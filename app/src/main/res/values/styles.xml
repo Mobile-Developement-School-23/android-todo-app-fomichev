@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="LargeTitle">
+        <item name="android:textSize">32sp</item>
+    </style>
+
+    <style name="Title">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="FloatingActionButtonStyle">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="MyDatePickerDialog" parent="android:Theme.DeviceDefault.Light.Dialog">
+        <item name="android:backgroundTint">@color/color_blue_calendar</item>
+    </style>
+
+    <style name="MySwitchStyle" parent="Widget.AppCompat.CompoundButton.Switch">
+        <item name="android:thumbTint">@color/color_dark_blue</item>
+        <item name="android:trackTint">@color/color_blue_calendar</item>
+        <item name="android:thumbTintMode">multiply</item>
+        <item name="android:trackTintMode">multiply</item>
+    </style>
+
+
+
+
+</resources>

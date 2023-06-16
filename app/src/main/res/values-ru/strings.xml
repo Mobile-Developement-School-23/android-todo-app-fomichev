@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ToDoApp</string>
+    <string name="my_todo_items">Мои дела</string>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+    <string name="what_need_to_do">Что надо сделать…</string>
+    <string name="priority">Важность</string>
+    <string name="do_for">Сделать до</string>
+    <string name="low_priority">Низкий</string>
+    <string name="No">Нет</string>
+    <string name="toast_for_empty_edit_text">Заполните поле описания задачи</string>
+    <string name="number_of_done_todo">"Сделано - "</string>
+    <string name="add_new_to_do_item">Новый</string>
+    <string name="high_priority"><font color="#FF3B30">!! Высокий</font></string>
+    <string name="item_info">Информация</string>
+    <string name="delete">Удалить</string>
+    <string name="new_item">Новый</string>
+</resources>

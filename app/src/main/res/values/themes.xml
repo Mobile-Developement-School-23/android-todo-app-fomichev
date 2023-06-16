@@ -1,9 +1,24 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.MyTodoApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+<resources>
+
+    <style name="Theme.MyTodoApp" parent="Theme.Material3.DayNight.NoActionBar">
+
+        <item name="colorPrimary">@color/back_light_primary</item>
+        <item name="colorSecondary">@color/back_light_secondary</item>
+        <item name="colorLabelTertiary">@color/label_light_tertiary</item>
+        <item name="colorRed">@color/color_light_red</item>
+        <item name="colorBlue">@color/color_light_blue</item>
+        <item name="colorOverlay">@color/support_light_overlay</item>
+        <item name="colorElevated">@color/back_light_elevated</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="colorLabelPrimary">@color/label_light_primary</item>
+        <item name="colorLabelDisable">@color/label_light_disable</item>
+        <item name="colorSupportSeparator">@color/support_light_separator</item>
+        <item name="colorLabelSecondary">@color/label_light_secondary</item>
+        <item name="colorGreen">@color/color_light_green</item>
+        <item name="colorGray">@color/color_light_gray</item>
+        <item name="colorGrayLight">@color/color_light_gray_light</item>
+        <item name="colorWhite">@color/color_light_white</item>
+
     </style>
 
-    <style name="Theme.MyTodoApp" parent="Base.Theme.MyTodoApp" />
 </resources>
