@@ -1,3 +1,23 @@
 <resources>
-    <string name="app_name">MyTodoApp</string>
+    <string name="app_name">ToDoApp</string>
+    <string name="item_info">Item info</string>
+
+    <!--- MainTodoListFragment-->
+    <string name="my_todo_items">My tasks</string>
+    <string name="number_of_done_todo">Done - </string>
+    <string name="add_new_to_do_item">Add new to-do item</string>
+    <string name="new_item">Add new</string>
+
+    <!--- AddEditTodoItemFragment-->
+    <string name="save">SAVE</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="what_need_to_do">What needs to be done…</string>
+    <string name="priority">Priority</string>
+    <string name="do_for">Do it before</string>
+    <string name="high_priority"><font color="#FF3B30">!! High</font></string>
+    <string name="low_priority">Low</string>
+    <string name="No">No</string>
+    <string name="toast_for_empty_edit_text">Fill the field or click cancel button</string>
+
 </resources>
