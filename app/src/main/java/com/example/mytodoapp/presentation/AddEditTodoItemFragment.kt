@@ -3,6 +3,7 @@ package com.example.mytodoapp.presentation
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,14 +18,14 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.example.mytodoapp.R
-import com.example.mytodoapp.TodoItem
-import com.example.mytodoapp.TodoItem.Companion.HIGH_IMPORTANCE
-import com.example.mytodoapp.TodoItem.Companion.LOW_IMPORTANCE
-import com.example.mytodoapp.TodoItem.Companion.NORMAL_IMPORTANCE
-import com.example.mytodoapp.TodoItem.Companion.NO_DEADLINE
-import com.example.mytodoapp.TodoItemsRepository
-import com.example.mytodoapp.TodoItemsRepository.Companion.idGenerate
+import com.example.mytodoapp.domain.TodoItem
+import com.example.mytodoapp.domain.TodoItem.Companion.HIGH_IMPORTANCE
+import com.example.mytodoapp.domain.TodoItem.Companion.LOW_IMPORTANCE
+import com.example.mytodoapp.domain.TodoItem.Companion.NORMAL_IMPORTANCE
+import com.example.mytodoapp.domain.TodoItem.Companion.NO_DEADLINE
+
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -32,8 +33,8 @@ import java.util.Locale
 
 
 class AddEditTodoItemFragment : Fragment() {
-    private var param1: Int? = null
-    private val todoItemRepository = TodoItemsRepository()
+
+    private lateinit var viewModel: TodoItemViewModel
     private lateinit var tvCalendar: TextView
     private lateinit var editTextDescription: EditText
     private lateinit var saveButton: Button
@@ -47,11 +48,12 @@ class AddEditTodoItemFragment : Fragment() {
     val simpleDateFormat = SimpleDateFormat("dd-MMMM-yyyy")
     private var creationDate = NO_CREATION_DATE
     var itemDone = false
+    private var todoItemId: Int = TodoItem.UNDEFINED_ID
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getInt(ARG_PARAM1)
+            todoItemId = it.getInt(ARG_PARAM1)
         }
     }
 
@@ -64,8 +66,12 @@ class AddEditTodoItemFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel = ViewModelProvider(this)[TodoItemViewModel::class.java]
         initViews(view)
-        chooseLaunchMode()
+        when (todoItemId) {
+            MODE_ADD -> launchAddMode()
+            else -> launchEditMode()
+        }
     }
 
     private fun initViews(view: View) {
@@ -79,105 +85,77 @@ class AddEditTodoItemFragment : Fragment() {
         initSpinnerPriority()
     }
 
-    private fun chooseLaunchMode() {
-        if (param1 == null) throw RuntimeException("Param screen mode is absent")
-        else if (param1 != MODE_ADD) launchEditMode()
-        else launchAddMode()
-    }
-
     private fun launchEditMode() {
-        fillTheFields()
-
-        saveButton.setOnClickListener {
-            saveEditTodoItem()
-        }
-        ibDeleteItem.setOnClickListener {
-            val exTodoItem = param1?.let { todoItemRepository.getToDoItemById(it) }
-            todoItemRepository.deleteToDoItem(exTodoItem!!)
-            openMainTodoListFragment()
-        }
-        ibCancel.setOnClickListener {
-            openMainTodoListFragment()
-        }
-    }
-
-    private fun fillTheFields() {
-        val exTodoItem = todoItemRepository.getToDoItemById(param1!!)
-        if (exTodoItem == null) {
-            throw RuntimeException("TodoItem not exist in repository")
-        } else {
-            editTextDescription.setText(exTodoItem.description)
-
-            when (exTodoItem.priority) {
-                HIGH_IMPORTANCE -> spinnerPriority.setSelection(2)
-                LOW_IMPORTANCE -> spinnerPriority.setSelection(1)
+        viewModel.getTodoItem(todoItemId)
+        viewModel.todoItem.observe(viewLifecycleOwner) {
+            editTextDescription.setText(it.description)
+            when (it.priority) {
+               HIGH_IMPORTANCE -> spinnerPriority.setSelection(2)
+               LOW_IMPORTANCE -> spinnerPriority.setSelection(1)
                 else -> spinnerPriority.setSelection(0)
             }
-
-            if (exTodoItem.deadline != NO_DEADLINE) {
-                tvCalendar.text = exTodoItem.deadline
+            if (it.deadline != NO_DEADLINE) {
+                tvCalendar.text = it.deadline
                 tvCalendar.visibility = View.VISIBLE
                 switchCalendar.isChecked = true
-                deadlineItem = exTodoItem.deadline
+                deadlineItem = it.deadline
 
             }
-            itemDone = exTodoItem.done
-            creationDate = exTodoItem.creationDate
+            itemDone = it.done
+            creationDate = it.creationDate
             initSwitchCalendar()
         }
-    }
 
-    private fun saveEditTodoItem() {
-        val editItemPriority =
-            if (spinnerPriority.selectedItemId.toInt() == 1) LOW_IMPORTANCE
-            else if (spinnerPriority.selectedItemId.toInt() == 2) HIGH_IMPORTANCE
-            else NORMAL_IMPORTANCE
-        var deadlineTodoItem = NO_DEADLINE
-        if (switchCalendar.isChecked) deadlineTodoItem = deadlineItem
 
-        val changeDate = simpleDateFormat.format(Date())
-
-        if (editTextDescription.text?.isNotEmpty() == true) {
-            val todoItem = TodoItem(
-                "$param1",
-                "${editTextDescription.text}",
-                editItemPriority,
-                itemDone,
-                creationDate,
-                changeDate,
-                deadlineTodoItem
-            )
-            todoItemRepository.editToDoItem(todoItem)
-            openMainTodoListFragment()
-        } else {
-            Toast.makeText(
-                activity,
-                R.string.toast_for_empty_edit_text,
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
-
-    private fun launchAddMode() {
-        initSwitchCalendar()
         saveButton.setOnClickListener {
-            val idItem = idGenerate
             val itemPriority =
                 if (spinnerPriority.selectedItemId.toInt() == 1) LOW_IMPORTANCE
                 else if (spinnerPriority.selectedItemId.toInt() == 2) HIGH_IMPORTANCE
                 else NORMAL_IMPORTANCE
             val currentDate = simpleDateFormat.format(Date())
             if (editTextDescription.text?.isNotEmpty() == true) {
-                val todoItem = TodoItem(
-                    "$idItem",
+                viewModel.editTodoItem(
                     "${editTextDescription.text}",
                     itemPriority,
-                    false,
-                    currentDate,
+                    itemDone,
+                    creationDate,
                     currentDate,
                     deadlineItem
                 )
-                todoItemRepository.addToDoItem(todoItem)
+                openMainTodoListFragment()
+            } else Toast.makeText(
+                activity,
+                getString(R.string.toast_for_empty_edit_text),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        ibDeleteItem.setOnClickListener {
+            val selectedTodoItem = viewModel.todoItem.value
+            if (selectedTodoItem != null) {
+                viewModel.deleteTodoItem(selectedTodoItem)
+                openMainTodoListFragment()
+            }
+        }
+        ibCancel.setOnClickListener {
+            openMainTodoListFragment()
+        }
+    }
+
+
+
+
+    private fun launchAddMode() {
+        initSwitchCalendar()
+        saveButton.setOnClickListener {
+            val itemPriority =
+                if (spinnerPriority.selectedItemId.toInt() == 1) LOW_IMPORTANCE
+                else if (spinnerPriority.selectedItemId.toInt() == 2) HIGH_IMPORTANCE
+                else NORMAL_IMPORTANCE
+            val currentDate = simpleDateFormat.format(Date())
+            if (editTextDescription.text?.isNotEmpty() == true) {
+                viewModel.addTodoItem("${editTextDescription.text}",itemPriority, false, currentDate, currentDate, deadlineItem)
+                Log.d("MyLog", "${editTextDescription.text} $itemPriority ${false} $currentDate $currentDate $deadlineItem")
                 openMainTodoListFragment()
             } else Toast.makeText(
                 activity,
@@ -208,6 +186,7 @@ class AddEditTodoItemFragment : Fragment() {
                 tvCalendar.visibility = View.VISIBLE
             } else {
                 tvCalendar.visibility = View.GONE
+                deadlineItem = NO_DEADLINE
             }
         }
     }

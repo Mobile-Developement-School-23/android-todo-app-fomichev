@@ -1,6 +1,5 @@
 package com.example.mytodoapp.presentation
 
-import android.annotation.SuppressLint
 import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
@@ -10,24 +9,19 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mytodoapp.R
-import com.example.mytodoapp.TodoItem
-import com.example.mytodoapp.TodoItem.Companion.HIGH_IMPORTANCE
-import com.example.mytodoapp.TodoItem.Companion.LOW_IMPORTANCE
-import com.example.mytodoapp.TodoItem.Companion.NO_DEADLINE
+import com.example.mytodoapp.domain.TodoItem
+import com.example.mytodoapp.domain.TodoItem.Companion.HIGH_IMPORTANCE
+import com.example.mytodoapp.domain.TodoItem.Companion.LOW_IMPORTANCE
+import com.example.mytodoapp.domain.TodoItem.Companion.NO_DEADLINE
 
-class TodoListAdapter(private val listener: OnTodoItemClickListener) :
-    RecyclerView.Adapter<TodoListAdapter.TodoListViewHolder>() {
+class TodoListAdapter : ListAdapter<TodoItem, TodoListAdapter.TodoListViewHolder>(TodoItemDiffCallback())  {
 
-    var todoList = listOf<TodoItem>()
-        set(value) {
-            val callback = TodoListDiffCallback(todoList, value)
-            val diffResult = DiffUtil.calculateDiff(callback)
-            diffResult.dispatchUpdatesTo(this)
-            field = value
-        }
 
+    var onTodoItemClickListener: OnTodoItemClickListener? = null
+    var onCheckboxItemClickListener: OnCheckboxItemClickListener? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoListViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(
             R.layout.todo_item,
@@ -39,7 +33,7 @@ class TodoListAdapter(private val listener: OnTodoItemClickListener) :
 
     override fun onBindViewHolder(holder: TodoListViewHolder, position: Int) = with(holder) {
 
-        val todoItem = todoList[position]
+        val todoItem = getItem(position)
         todoDescription.text = todoItem.description
         todoDone.isChecked = todoItem.done
 
@@ -71,19 +65,18 @@ class TodoListAdapter(private val listener: OnTodoItemClickListener) :
             tvDeadline.text = todoItem.deadline
         } else tvDeadline.visibility = View.GONE
 
-
         itemView.setOnClickListener {
-            listener.onTodoItemClick(todoItem)
+            onTodoItemClickListener?.onTodoItemClick(todoItem)
         }
         todoItemInfoButton.setOnClickListener {
-            listener.onTodoItemClick(todoItem)
+            onTodoItemClickListener?.onTodoItemClick(todoItem)
         }
+
         todoDone.setOnClickListener {
-            listener.onCheckboxItemClick(todoItem)
+            onCheckboxItemClickListener?.onCheckboxItemClick(todoItem)
         }
     }
 
-    override fun getItemCount() = todoList.size
 
 
     class TodoListViewHolder(todoItemView: View) : RecyclerView.ViewHolder(todoItemView) {
@@ -97,11 +90,12 @@ class TodoListAdapter(private val listener: OnTodoItemClickListener) :
 
     }
 
+
     interface OnTodoItemClickListener {
-
         fun onTodoItemClick(todoItem: TodoItem)
+    }
 
+    interface OnCheckboxItemClickListener {
         fun onCheckboxItemClick(todoItem: TodoItem)
-
     }
 }
