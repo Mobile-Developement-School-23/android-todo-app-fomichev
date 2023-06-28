@@ -3,6 +3,7 @@ package com.example.mytodoapp.presentation
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+
 import com.example.mytodoapp.data.TodoListRepositoryImpl
 import com.example.mytodoapp.domain.EditTodoItemUseCase
 import com.example.mytodoapp.domain.GetTodoListUseCase
@@ -17,6 +18,7 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
     private val editTodoItemUseCase = EditTodoItemUseCase(repository)
 
     val todoList = getTodoListUseCase.getTodoList()
+
 
 
     fun changeEnableState(todoItem: TodoItem) {

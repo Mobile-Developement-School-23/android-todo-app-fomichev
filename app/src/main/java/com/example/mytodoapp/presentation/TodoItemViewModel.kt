@@ -50,7 +50,6 @@ class TodoItemViewModel(application: Application) : AndroidViewModel(application
         if (fieldsValid) {
             viewModelScope.launch {
                 val todoItem = TodoItem(description, priority, done, creatingDate, changeDate, deadline)
-                Log.d("MyLog", "$todoItem")
                 addTodoItemUseCase.addTodoItem(todoItem)
             }
         }

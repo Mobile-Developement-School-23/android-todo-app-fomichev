@@ -4,6 +4,8 @@ import com.example.mytodoapp.domain.TodoItem
 
 class TodoListMapper {
 
+
+
     fun mapEntityToDbModel(todoItem: TodoItem) = TodoItemDbModel(
         id = todoItem.id,
         description = todoItem.description,
