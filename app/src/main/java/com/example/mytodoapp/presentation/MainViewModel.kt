@@ -1,42 +1,67 @@
 package com.example.mytodoapp.presentation
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
 import com.example.mytodoapp.data.TodoListRepositoryImpl
+import com.example.mytodoapp.data.network.CheckConnection
 import com.example.mytodoapp.data.network.SharedPreferencesHelper
 import com.example.mytodoapp.domain.EditTodoItemUseCase
 import com.example.mytodoapp.domain.GetTodoListUseCase
 import com.example.mytodoapp.domain.TodoItem
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.launch
 
-class MainViewModel(application: Application): AndroidViewModel(application) {
+class MainViewModel(private val repository: TodoListRepositoryImpl,
+                    private val sharedPreferencesHelper: SharedPreferencesHelper,
+                    private val connection: CheckConnection): ViewModel() {
 
-    private val repository = TodoListRepositoryImpl(application)
 
-    private val sharedPreferencesHelper = SharedPreferencesHelper(application)
+
     private val getTodoListUseCase = GetTodoListUseCase(repository)
     private val editTodoItemUseCase = EditTodoItemUseCase(repository)
-
     val todoList = getTodoListUseCase.getTodoList()
 
-    val countComplete = todoList.value?.count { item -> item.done }
+    var modeAll: Boolean = false
+    private var job: Job? = null
 
+    private val _data = MutableSharedFlow<List<TodoItem>>()
+    val data: SharedFlow<List<TodoItem>> = _data.asSharedFlow()
+    init {
+        if(connection.isOnline()){
+            loadNetworkList()
+        }
+        loadData()
+    }
     fun changeEnableState(todoItem: TodoItem) {
         viewModelScope.launch {
             val newItem = todoItem.copy(done = !todoItem.done)
             editTodoItemUseCase.editTodoItem(newItem)
             updateNetworkItem(todoItem)
+        }
+    }
+
+    fun changeMode() {
+        modeAll = !modeAll
+        job?.cancel()
+        loadData()
+    }
+    fun loadNetworkList() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.getNetworkData()
+        }
+    }
+
+    fun loadData() {
+        job = viewModelScope.launch(Dispatchers.IO) {
+            _data.emitAll(repository.getAllData())
         }
     }
 

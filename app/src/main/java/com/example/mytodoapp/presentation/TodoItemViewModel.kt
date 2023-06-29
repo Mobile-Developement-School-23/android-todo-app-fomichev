@@ -1,12 +1,11 @@
 package com.example.mytodoapp.presentation
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mytodoapp.data.AppDataBase
 import com.example.mytodoapp.data.TodoListRepositoryImpl
+import com.example.mytodoapp.data.network.CheckConnection
 import com.example.mytodoapp.data.network.NetworkAccess
 import com.example.mytodoapp.data.network.SharedPreferencesHelper
 import com.example.mytodoapp.domain.AddTodoItemUseCase
@@ -17,29 +16,27 @@ import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.Date
+import java.sql.Date
 
 
-class TodoItemViewModel(application: Application) : AndroidViewModel(application) {
+class TodoItemViewModel( private val repository: TodoListRepositoryImpl,
+                         private val sharedPreferencesHelper: SharedPreferencesHelper,
+                         private val connection: CheckConnection
+) : ViewModel() {
 
-    private val repository = TodoListRepositoryImpl(application)
-    private val sharedPreferencesHelper = SharedPreferencesHelper(application)
+
+
     private val getTodoItemUseCase = GetTodoItemUseCase(repository)
     private val addTodoItemUseCase = AddTodoItemUseCase(repository)
     private val editTodoItemUseCase = EditTodoItemUseCase(repository)
     private val deleteShopItemUseCase = DeleteTodoItemUseCase(repository)
-
     private val _errorInputName = MutableLiveData<Boolean>()
-    val errorInputName: LiveData<Boolean>
-        get() = _errorInputName
+
 
     private val _todoItem = MutableLiveData<TodoItem>()
     val todoItem: LiveData<TodoItem>
         get() = _todoItem
 
-    private val _shouldCloseScreen = MutableLiveData<Unit>()
-    val shouldCloseScreen: LiveData<Unit>
-        get() = _shouldCloseScreen
 
 
     fun getTodoItem(todoItemId: String) {

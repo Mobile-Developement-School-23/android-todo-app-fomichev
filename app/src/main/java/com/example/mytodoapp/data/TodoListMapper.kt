@@ -2,7 +2,6 @@ package com.example.mytodoapp.data
 
 import com.example.mytodoapp.data.network.TodoItemDbModel
 import com.example.mytodoapp.domain.TodoItem
-import java.util.Date
 
 class TodoListMapper {
 
@@ -13,7 +12,7 @@ class TodoListMapper {
         description = todoItem.description,
         importance = todoItem.priority,
         done = todoItem.done,
-        createdAt = todoItem.creationDate.time,
+        createdAt = todoItem.creationDate!!.time,
         changedAt = todoItem.changeDate?.time,
         deadline = todoItem.deadline?.time
     )

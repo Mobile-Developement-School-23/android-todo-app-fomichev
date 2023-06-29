@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -15,11 +16,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.mytodoapp.R
 import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.domain.TodoItemsRepository
+import com.example.mytodoapp.factory
 import com.example.mytodoapp.presentation.AddEditTodoItemFragment.Companion.MODE_ADD
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.imageview.ShapeableImageView
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+
 
 
 class MainTodoListFragment() : Fragment(){
@@ -28,8 +31,8 @@ class MainTodoListFragment() : Fragment(){
     private lateinit var todoDoneItem: String
     private lateinit var numberOfDoneTodo: TextView
     private lateinit var buttonAddTodoItem: FloatingActionButton
-    private lateinit var viewModel: MainViewModel
-
+   // private lateinit var viewModel: MainViewModel
+    private val viewModel: MainViewModel by  activityViewModels{factory()}
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,7 +46,7 @@ class MainTodoListFragment() : Fragment(){
         super.onViewCreated(view, savedInstanceState)
         initViews(view)
         setupRecyclerView()
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+      //  viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.todoList.observe(viewLifecycleOwner) {
             todoListAdapter.submitList(it.sortedBy { it.creationDate })
         }

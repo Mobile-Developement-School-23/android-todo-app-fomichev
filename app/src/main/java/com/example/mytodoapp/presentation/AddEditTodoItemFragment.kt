@@ -18,23 +18,25 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.example.mytodoapp.R
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
 
 import com.example.mytodoapp.domain.TodoItem.Companion.NO_DEADLINE
+import com.example.mytodoapp.factory
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
+import java.sql.Date
 import java.util.Locale
 import java.util.UUID.randomUUID
 
 
 class AddEditTodoItemFragment : Fragment() {
 
-    private lateinit var viewModel: TodoItemViewModel
+    private val viewModel: TodoItemViewModel by  activityViewModels{factory()}
     private lateinit var tvCalendar: TextView
     private lateinit var editTextDescription: EditText
     private lateinit var saveButton: Button
@@ -66,7 +68,8 @@ class AddEditTodoItemFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[TodoItemViewModel::class.java]
+      //  viewModel = ViewModelProvider(this)[TodoItemViewModel::class.java]
+
         initViews(view)
         when (todoItemId) {
             MODE_ADD -> launchAddMode()
@@ -111,7 +114,7 @@ class AddEditTodoItemFragment : Fragment() {
                 if (spinnerPriority.selectedItemId.toInt() == 1) Importance.LOW
                 else if (spinnerPriority.selectedItemId.toInt() == 2) Importance.HIGH
                 else Importance.NORMAL
-            val currentDate = Date()
+            val currentDate = Date(System.currentTimeMillis())
             if (editTextDescription.text?.isNotEmpty() == true) {
                 viewModel.editTodoItem(
                     "${editTextDescription.text}",
@@ -152,7 +155,7 @@ class AddEditTodoItemFragment : Fragment() {
                 if (spinnerPriority.selectedItemId.toInt() == 1) Importance.LOW
                 else if (spinnerPriority.selectedItemId.toInt() == 2) Importance.HIGH
                 else Importance.NORMAL
-            val currentDate = Date()
+            val currentDate = Date(System.currentTimeMillis())
             val id = randomUUID().toString()
             if (editTextDescription.text?.isNotEmpty() == true) {
                 viewModel.addTodoItem("${editTextDescription.text}",itemPriority, false, currentDate, currentDate, deadlineItem, id)
@@ -203,19 +206,23 @@ class AddEditTodoItemFragment : Fragment() {
         }
     }
 
+
     private fun setData() {
         val datePicker = Calendar.getInstance()
-        val date =
-            DatePickerDialog.OnDateSetListener { view: DatePicker?, year: Int, month: Int, dayOfMonth: Int ->
-                datePicker[Calendar.YEAR] = year
-                datePicker[Calendar.MONTH] = month
-                datePicker[Calendar.DAY_OF_MONTH] = dayOfMonth
-                val dateFormat = "dd-MMMM-yyyy"
-                val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.getDefault())
-                val tvCalendar = activity?.findViewById<TextView>(R.id.tvCalendar)
-                tvCalendar?.text = simpleDateFormat.format(datePicker.time)
-                deadlineItem = datePicker.time
-            }
+        val date = DatePickerDialog.OnDateSetListener { view: DatePicker?, year: Int, month: Int, dayOfMonth: Int ->
+            datePicker[Calendar.YEAR] = year
+            datePicker[Calendar.MONTH] = month
+            datePicker[Calendar.DAY_OF_MONTH] = dayOfMonth
+
+            val dateFormat = "dd-MMMM-yyyy"
+            val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.getDefault())
+
+            val tvCalendar = activity?.findViewById<TextView>(R.id.tvCalendar)
+            tvCalendar?.text = simpleDateFormat.format(datePicker.time)
+
+            deadlineItem = Date(datePicker.timeInMillis)
+        }
+
         DatePickerDialog(
             requireActivity(),
             R.style.MyDatePickerDialog,

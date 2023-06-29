@@ -16,7 +16,7 @@ class SharedPreferencesHelper(context: Context){
             editor.apply()
         }
 
-        Common.updated_by = sharedPreferences.getString("UID", "-1").toString()
+        BaseUrl.updated_by = sharedPreferences.getString("UID", "-1").toString()
 
     }
 

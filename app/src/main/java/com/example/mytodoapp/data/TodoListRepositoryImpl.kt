@@ -1,10 +1,9 @@
 package com.example.mytodoapp.data
 
-import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import com.example.mytodoapp.data.network.Common
+import com.example.mytodoapp.data.network.BaseUrl
 import com.example.mytodoapp.data.network.NetworkAccess
 import com.example.mytodoapp.data.network.SharedPreferencesHelper
 import com.example.mytodoapp.data.network.TodoItemDbModel
@@ -15,17 +14,18 @@ import com.example.mytodoapp.data.network.response.TodoItemResponse
 import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.domain.TodoItemsRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class TodoListRepositoryImpl(
-    application: Application
+    db: AppDataBase, private val sharedPreferencesHelper: SharedPreferencesHelper
 ) : TodoItemsRepository {
-    private val service = Common.retrofitService
-    private val todoListDao = AppDataBase.getInstance(application).todoListDao()
+    private val service = BaseUrl.retrofitService
+
     private val mapper = TodoListMapper()
-    private val sharedPreferencesHelper = SharedPreferencesHelper(application)
-    private val db= AppDataBase
-    private val dao = db.getInstance(application).todoListDao()
+
+    private val todoListDao = db.listDao
     override suspend fun addTodoItem(todoItem: TodoItem) {
         todoListDao.addShopItem(mapper.mapEntityToDbModel(todoItem))
     }
@@ -48,6 +48,9 @@ class TodoListRepositoryImpl(
             value = mapper.mapListDbModelToListEntity(it)
         }
     }
+
+    fun getAllData(): Flow<List<TodoItem>> =
+        todoListDao.getAllFlow().map { list -> list.map { it.toItem() } }
 
 
 
@@ -110,7 +113,7 @@ class TodoListRepositoryImpl(
             val body = networkListResponse.body()
             if (body != null) {
                 val networkList = body.list
-                val currentList = dao.getAll().map { TodoItemResponse.fromItem(it.toItem()) }
+                val currentList = todoListDao.getAll().map { TodoItemResponse.fromItem(it.toItem()) }
                 val mergedList = HashMap<String, TodoItemResponse>()
 
                 for(item in networkList){
@@ -154,7 +157,7 @@ class TodoListRepositoryImpl(
 
     private suspend fun updateRoom(response: List<TodoItemResponse>) {
         val list = response.map { it.toItem() }
-        dao.addList(list.map { TodoItemDbModel.fromItem(it) })
+        todoListDao.addList(list.map { TodoItemDbModel.fromItem(it) })
     }
 }
 

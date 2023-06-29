@@ -1,7 +1,6 @@
 package com.example.mytodoapp.domain
 
-import java.net.URLDecoder
-import java.util.Date
+import java.sql.Date
 
 
 data class TodoItem(

@@ -1,6 +1,6 @@
 package com.example.mytodoapp.data.network.response
 
-import com.example.mytodoapp.data.network.Common
+import com.example.mytodoapp.data.network.BaseUrl
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
 import com.google.gson.annotations.SerializedName
@@ -36,9 +36,9 @@ data class TodoItemResponse(
             }
         },
         done,
-        deadline?.let { Date(it) }!!,
         Date(dateCreation),
         Date(dateChanged),
+        deadline?.let { Date(it) },
         id
     )
 
@@ -49,8 +49,8 @@ data class TodoItemResponse(
                 text = toDoItem.description,
                 importance = when (toDoItem.priority) {
                     Importance.LOW -> "low"
-                    Importance.NORMAL -> "normal"
-                    Importance.HIGH -> "high"
+                    Importance.NORMAL -> "basic"
+                    Importance.HIGH -> "important"
                 },
                 deadline = toDoItem.deadline?.time,
                 done = toDoItem.done,
@@ -61,7 +61,7 @@ data class TodoItemResponse(
                         toDoItem.changeDate!!.time
                     }
                 },
-                updated_by = Common.updated_by
+                updated_by = BaseUrl.updated_by
             )
         }
     }
