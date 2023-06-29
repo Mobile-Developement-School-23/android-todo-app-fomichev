@@ -21,3 +21,9 @@ data class TodoItem(
     }
 
 }
+
+enum class Importance {
+    LOW,
+    NORMAL,
+    HIGH;
+}

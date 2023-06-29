@@ -2,24 +2,31 @@ package com.example.mytodoapp.presentation
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 
 import com.example.mytodoapp.data.TodoListRepositoryImpl
 import com.example.mytodoapp.domain.EditTodoItemUseCase
 import com.example.mytodoapp.domain.GetTodoListUseCase
 import com.example.mytodoapp.domain.TodoItem
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class MainViewModel(application: Application): AndroidViewModel(application) {
 
     private val repository = TodoListRepositoryImpl(application)
 
+
     private val getTodoListUseCase = GetTodoListUseCase(repository)
     private val editTodoItemUseCase = EditTodoItemUseCase(repository)
 
     val todoList = getTodoListUseCase.getTodoList()
 
-
+    val countComplete = todoList.value?.count { item -> item.done }
 
     fun changeEnableState(todoItem: TodoItem) {
         viewModelScope.launch {

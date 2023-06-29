@@ -7,12 +7,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.mytodoapp.data.TodoListRepositoryImpl
+import com.example.mytodoapp.data.network.NetworkAccess
 import com.example.mytodoapp.domain.AddTodoItemUseCase
 import com.example.mytodoapp.domain.DeleteTodoItemUseCase
 import com.example.mytodoapp.domain.EditTodoItemUseCase
 import com.example.mytodoapp.domain.GetTodoItemUseCase
 import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.domain.TodoItem.Companion.NO_DEADLINE
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class TodoItemViewModel(application: Application) : AndroidViewModel(application) {
@@ -52,8 +54,11 @@ class TodoItemViewModel(application: Application) : AndroidViewModel(application
                 val todoItem = TodoItem(description, priority, done, creatingDate, changeDate, deadline)
                 addTodoItemUseCase.addTodoItem(todoItem)
             }
+
         }
     }
+
+
 
     fun editTodoItem(inputDescription: String?, priority: String, done: Boolean, creatingDate: String, changeDate:String, deadline: String) {
         val description = parseName(inputDescription)

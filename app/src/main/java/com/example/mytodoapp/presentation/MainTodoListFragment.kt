@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +18,8 @@ import com.example.mytodoapp.domain.TodoItemsRepository
 import com.example.mytodoapp.presentation.AddEditTodoItemFragment.Companion.MODE_ADD
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.imageview.ShapeableImageView
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 
 class MainTodoListFragment() : Fragment(){
@@ -49,8 +52,14 @@ class MainTodoListFragment() : Fragment(){
                 .replace(R.id.root_container, AddEditTodoItemFragment.newInstance(MODE_ADD))
                 .addToBackStack(null).commit()
         }
+        val doneItems = viewModel.countItemsWithTrueDone()
+        todoDoneItem =
+            getString(R.string.number_of_done_todo) + doneItems.toString()
+        numberOfDoneTodo.text = todoDoneItem
+
 
     }
+
 
 
     private fun initViews(view: View) {
