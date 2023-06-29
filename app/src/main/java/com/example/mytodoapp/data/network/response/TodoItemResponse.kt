@@ -25,44 +25,44 @@ data class TodoItemResponse(
     var updated_by: String
 ) {
 
-//    fun toItem(): TodoItem = TodoItem(
-//        id,
-//        text,
-//        when (importance) {
-//            "low" -> Importance.LOW
-//            "basic" -> Importance.NORMAL
-//            "important" -> Importance.HIGH
-//            else -> {
-//                Importance.NORMAL
-//            }
-//        },
-//        deadline?.let { Date(it) },
-//        done,
-//        Date(dateCreation),
-//        Date(dateChanged)
-//    )
-//
-//    companion object {
-//        fun fromItem(toDoItem: TodoItem): TodoItemResponse {
-//            return TodoItemResponse(
-//                id = toDoItem.id,
-//                text = toDoItem.description,
-//                importance = when (toDoItem.importance) {
-//                    Importance.LOW -> "low"
-//                    Importance.NORMAL -> "normal"
-//                    Importance.HIGH -> "high"
-//                },
-//                deadline = toDoItem.deadline.time,
-//                done = toDoItem.done,
-//                dateCreation = toDoItem.dateCreation.time,
-//                dateChanged = when (toDoItem.dateChanged) {
-//                    null -> toDoItem.dateCreation.time
-//                    else -> {
-//                        toDoItem.dateChanged!!.time
-//                    }
-//                },
-//                updated_by = Common.updated_by
-//            )
-//        }
-//    }
+    fun toItem(): TodoItem = TodoItem(
+        text,
+        when (importance) {
+            "low" -> Importance.LOW
+            "basic" -> Importance.NORMAL
+            "important" -> Importance.HIGH
+            else -> {
+                Importance.NORMAL
+            }
+        },
+        done,
+        deadline?.let { Date(it) }!!,
+        Date(dateCreation),
+        Date(dateChanged),
+        id
+    )
+
+    companion object {
+        fun fromItem(toDoItem: TodoItem): TodoItemResponse {
+            return TodoItemResponse(
+                id = toDoItem.id,
+                text = toDoItem.description,
+                importance = when (toDoItem.priority) {
+                    Importance.LOW -> "low"
+                    Importance.NORMAL -> "normal"
+                    Importance.HIGH -> "high"
+                },
+                deadline = toDoItem.deadline?.time,
+                done = toDoItem.done,
+                dateCreation = toDoItem.creationDate.time,
+                dateChanged = when (toDoItem.changeDate) {
+                    null -> toDoItem.creationDate.time
+                    else -> {
+                        toDoItem.changeDate!!.time
+                    }
+                },
+                updated_by = Common.updated_by
+            )
+        }
+    }
 }

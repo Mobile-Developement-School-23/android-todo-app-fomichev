@@ -42,6 +42,4 @@ interface RetrofitService {
         @Header("X-Last-Known-Revision") lastKnownRevision: Int,
         @Body item: PostItemApiRequest
     ): Response<PostItemApiResponse>
-
-
 }

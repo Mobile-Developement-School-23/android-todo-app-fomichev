@@ -1,23 +1,24 @@
 package com.example.mytodoapp.domain
 
+import java.net.URLDecoder
+import java.util.Date
+
+
 data class TodoItem(
     var description: String,
-    var priority: String = NORMAL_IMPORTANCE,
+    var priority: Importance,
     var done: Boolean,
-    var creationDate: String,
-    var changeDate: String = "",
-    var deadline: String = NO_DEADLINE,
-    var id: Int = UNDEFINED_ID
+    var creationDate: Date,
+    var changeDate: Date?,
+    var deadline: Date?,
+    var id: String = UNDEFINED_ID
 ) {
 
     companion object {
-        const val NO_DEADLINE = "no deadline"
+        val NO_DEADLINE = null
 
-        const val LOW_IMPORTANCE = "low importance"
-        const val NORMAL_IMPORTANCE = "normal importance"
-        const val HIGH_IMPORTANCE = "high importance"
 
-        const val UNDEFINED_ID = 0
+        const val UNDEFINED_ID = "0"
     }
 
 }

@@ -45,33 +45,30 @@ class MainTodoListFragment() : Fragment(){
         setupRecyclerView()
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.todoList.observe(viewLifecycleOwner) {
-            todoListAdapter.submitList(it)
+            todoListAdapter.submitList(it.sortedBy { it.creationDate })
         }
         buttonAddTodoItem.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.root_container, AddEditTodoItemFragment.newInstance(MODE_ADD))
                 .addToBackStack(null).commit()
         }
-        val doneItems = viewModel.countItemsWithTrueDone()
-        todoDoneItem =
-            getString(R.string.number_of_done_todo) + doneItems.toString()
-        numberOfDoneTodo.text = todoDoneItem
 
-
+        viewModel.todoList.observe(viewLifecycleOwner) { todoList ->
+            viewModel.countItemsWithTrueDone().observe(viewLifecycleOwner) { count ->
+                val todoDoneItem = getString(R.string.number_of_done_todo) + count
+                numberOfDoneTodo.text = todoDoneItem
+            }
+        }
     }
 
 
 
     private fun initViews(view: View) {
         numberOfDoneTodo = view.findViewById(R.id.numberOfDoneTodo)
-  //      val todoDoneItemNumber =
-  //          todoItemsRepository.getToDoList().size - todoItemsRepository.getToDoListUnDone().size
- //       todoDoneItem =
- //           getString(R.string.number_of_done_todo) + todoDoneItemNumber.toString()
-//        numberOfDoneTodo.text = todoDoneItem
 
         buttonAddTodoItem =
             view.findViewById(R.id.button_add_todo_item)
+
         val changeVisibility: ShapeableImageView =
             view.findViewById(R.id.change_visibility)
         changeVisibility.tag = true
@@ -96,11 +93,9 @@ class MainTodoListFragment() : Fragment(){
 
     private fun setupRecyclerView() {
 
-
         todoListRecyclerView = requireActivity().findViewById(R.id.todoListRcView)
         todoListAdapter = TodoListAdapter()
         todoListRecyclerView.adapter = todoListAdapter
-
         setupClickListener()
         setupCheckboxItemClickListener()
     }
@@ -120,7 +115,6 @@ class MainTodoListFragment() : Fragment(){
         todoListAdapter.onCheckboxItemClickListener = object : TodoListAdapter.OnCheckboxItemClickListener {
             override fun onCheckboxItemClick(todoItem: TodoItem) {
                 viewModel.changeEnableState(todoItem)
-                todoListAdapter.notifyItemChanged(todoItem.id)
             }
         }
     }

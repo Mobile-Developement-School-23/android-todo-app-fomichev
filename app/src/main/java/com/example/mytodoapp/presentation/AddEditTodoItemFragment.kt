@@ -20,16 +20,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.mytodoapp.R
+import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
-import com.example.mytodoapp.domain.TodoItem.Companion.HIGH_IMPORTANCE
-import com.example.mytodoapp.domain.TodoItem.Companion.LOW_IMPORTANCE
-import com.example.mytodoapp.domain.TodoItem.Companion.NORMAL_IMPORTANCE
+
 import com.example.mytodoapp.domain.TodoItem.Companion.NO_DEADLINE
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.UUID.randomUUID
 
 
 class AddEditTodoItemFragment : Fragment() {
@@ -43,17 +43,17 @@ class AddEditTodoItemFragment : Fragment() {
     private lateinit var spinnerPriority: Spinner
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private lateinit var switchCalendar: Switch
-    var deadlineItem: String = NO_DEADLINE
+    private var deadlineItem: Date? = NO_DEADLINE
     @SuppressLint("SimpleDateFormat")
     val simpleDateFormat = SimpleDateFormat("dd-MMMM-yyyy")
     private var creationDate = NO_CREATION_DATE
     var itemDone = false
-    private var todoItemId: Int = TodoItem.UNDEFINED_ID
+    private var todoItemId: String = TodoItem.UNDEFINED_ID
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            todoItemId = it.getInt(ARG_PARAM1)
+            todoItemId = it.getString(ARG_PARAM1)!!
         }
     }
 
@@ -90,37 +90,37 @@ class AddEditTodoItemFragment : Fragment() {
         viewModel.todoItem.observe(viewLifecycleOwner) {
             editTextDescription.setText(it.description)
             when (it.priority) {
-               HIGH_IMPORTANCE -> spinnerPriority.setSelection(2)
-               LOW_IMPORTANCE -> spinnerPriority.setSelection(1)
+               Importance.HIGH -> spinnerPriority.setSelection(2)
+               Importance.LOW -> spinnerPriority.setSelection(1)
                 else -> spinnerPriority.setSelection(0)
             }
-            if (it.deadline != NO_DEADLINE) {
-                tvCalendar.text = it.deadline
+            if (it.deadline != null) {
+                tvCalendar.text = it.deadline.toString()
                 tvCalendar.visibility = View.VISIBLE
                 switchCalendar.isChecked = true
                 deadlineItem = it.deadline
-
             }
             itemDone = it.done
-            creationDate = it.creationDate
+            creationDate = it.creationDate.toString()
             initSwitchCalendar()
         }
 
 
         saveButton.setOnClickListener {
             val itemPriority =
-                if (spinnerPriority.selectedItemId.toInt() == 1) LOW_IMPORTANCE
-                else if (spinnerPriority.selectedItemId.toInt() == 2) HIGH_IMPORTANCE
-                else NORMAL_IMPORTANCE
-            val currentDate = simpleDateFormat.format(Date())
+                if (spinnerPriority.selectedItemId.toInt() == 1) Importance.LOW
+                else if (spinnerPriority.selectedItemId.toInt() == 2) Importance.HIGH
+                else Importance.NORMAL
+            val currentDate = Date()
             if (editTextDescription.text?.isNotEmpty() == true) {
                 viewModel.editTodoItem(
                     "${editTextDescription.text}",
                     itemPriority,
                     itemDone,
-                    creationDate,
                     currentDate,
-                    deadlineItem
+                    currentDate,
+                    deadlineItem,
+                    todoItemId
                 )
                 openMainTodoListFragment()
             } else Toast.makeText(
@@ -149,13 +149,14 @@ class AddEditTodoItemFragment : Fragment() {
         initSwitchCalendar()
         saveButton.setOnClickListener {
             val itemPriority =
-                if (spinnerPriority.selectedItemId.toInt() == 1) LOW_IMPORTANCE
-                else if (spinnerPriority.selectedItemId.toInt() == 2) HIGH_IMPORTANCE
-                else NORMAL_IMPORTANCE
-            val currentDate = simpleDateFormat.format(Date())
+                if (spinnerPriority.selectedItemId.toInt() == 1) Importance.LOW
+                else if (spinnerPriority.selectedItemId.toInt() == 2) Importance.HIGH
+                else Importance.NORMAL
+            val currentDate = Date()
+            val id = randomUUID().toString()
             if (editTextDescription.text?.isNotEmpty() == true) {
-                viewModel.addTodoItem("${editTextDescription.text}",itemPriority, false, currentDate, currentDate, deadlineItem)
-                Log.d("MyLog", "${editTextDescription.text} $itemPriority ${false} $currentDate $currentDate $deadlineItem")
+                viewModel.addTodoItem("${editTextDescription.text}",itemPriority, false, currentDate, currentDate, deadlineItem, id)
+                Log.d("MyLog", "${editTextDescription.text} $itemPriority ${false} $currentDate $currentDate $deadlineItem $id" )
                 openMainTodoListFragment()
             } else Toast.makeText(
                 activity,
@@ -213,7 +214,7 @@ class AddEditTodoItemFragment : Fragment() {
                 val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.getDefault())
                 val tvCalendar = activity?.findViewById<TextView>(R.id.tvCalendar)
                 tvCalendar?.text = simpleDateFormat.format(datePicker.time)
-                deadlineItem = simpleDateFormat.format(datePicker.time)
+                deadlineItem = datePicker.time
             }
         DatePickerDialog(
             requireActivity(),
@@ -228,15 +229,15 @@ class AddEditTodoItemFragment : Fragment() {
 
     companion object {
 
-        const val MODE_ADD = -1
+        const val MODE_ADD = "-1"
         private const val ARG_PARAM1 = "param1"
         private const val NO_CREATION_DATE = ""
 
         @JvmStatic
-        fun newInstance(param1: Int?) = AddEditTodoItemFragment().apply {
+        fun newInstance(param1: String?) = AddEditTodoItemFragment().apply {
             arguments = Bundle().apply {
                 if (param1 != null) {
-                    putInt(ARG_PARAM1, param1)
+                    putString(ARG_PARAM1, param1)
                 }
             }
         }

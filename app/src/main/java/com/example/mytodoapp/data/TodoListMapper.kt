@@ -1,6 +1,8 @@
 package com.example.mytodoapp.data
 
+import com.example.mytodoapp.data.network.TodoItemDbModel
 import com.example.mytodoapp.domain.TodoItem
+import java.util.Date
 
 class TodoListMapper {
 
@@ -9,21 +11,21 @@ class TodoListMapper {
     fun mapEntityToDbModel(todoItem: TodoItem) = TodoItemDbModel(
         id = todoItem.id,
         description = todoItem.description,
-        priority = todoItem.priority,
+        importance = todoItem.priority,
         done = todoItem.done,
-        creationDate = todoItem.creationDate,
-        changeDate = todoItem.changeDate,
-        deadline = todoItem.deadline
+        createdAt = todoItem.creationDate.time,
+        changedAt = todoItem.changeDate?.time,
+        deadline = todoItem.deadline?.time
     )
 
     fun mapDbModelToEntity(todoItemDbModel: TodoItemDbModel) = TodoItem(
         id = todoItemDbModel.id,
         description = todoItemDbModel.description,
-        priority = todoItemDbModel.priority,
+        priority = todoItemDbModel.importance,
         done = todoItemDbModel.done,
-        creationDate = todoItemDbModel.creationDate,
-        changeDate = todoItemDbModel.changeDate,
-        deadline = todoItemDbModel.deadline
+        creationDate = java.sql.Date(todoItemDbModel.createdAt),
+        changeDate = todoItemDbModel.changedAt?.let { java.sql.Date(it) },
+        deadline = todoItemDbModel.deadline?.let { java.sql.Date(it) }
     )
 
     fun mapListDbModelToListEntity(list:List<TodoItemDbModel>) = list.map {

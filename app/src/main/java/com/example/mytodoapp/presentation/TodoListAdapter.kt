@@ -12,10 +12,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mytodoapp.R
+import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
-import com.example.mytodoapp.domain.TodoItem.Companion.HIGH_IMPORTANCE
-import com.example.mytodoapp.domain.TodoItem.Companion.LOW_IMPORTANCE
-import com.example.mytodoapp.domain.TodoItem.Companion.NO_DEADLINE
+
 
 class TodoListAdapter : ListAdapter<TodoItem, TodoListAdapter.TodoListViewHolder>(TodoItemDiffCallback())  {
 
@@ -41,13 +40,13 @@ class TodoListAdapter : ListAdapter<TodoItem, TodoListAdapter.TodoListViewHolder
         else todoDescription.paintFlags = 0
 
         when (todoItem.priority) {
-            LOW_IMPORTANCE -> {
+            Importance.LOW -> {
                 buttonPriority.setBackgroundResource(R.drawable.ic_low_priority)
                 buttonPriority.visibility = View.VISIBLE
                 checkboxDone.setButtonDrawable(R.drawable.checkbox_selection)
             }
 
-            HIGH_IMPORTANCE -> {
+            Importance.HIGH -> {
                 buttonPriority.setBackgroundResource(R.drawable.ic_high_priority)
                 buttonPriority.visibility = View.VISIBLE
                 todoDone.setButtonDrawable(R.drawable.checkbox_selection_high)
@@ -60,9 +59,9 @@ class TodoListAdapter : ListAdapter<TodoItem, TodoListAdapter.TodoListViewHolder
             }
         }
 
-        if (todoItem.deadline != NO_DEADLINE) {
+        if (todoItem.deadline != null) {
             tvDeadline.visibility = View.VISIBLE
-            tvDeadline.text = todoItem.deadline
+            tvDeadline.text = todoItem.deadline.toString()
         } else tvDeadline.visibility = View.GONE
 
         itemView.setOnClickListener {

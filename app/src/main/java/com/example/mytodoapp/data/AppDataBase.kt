@@ -4,8 +4,9 @@ import android.app.Application
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.mytodoapp.data.network.TodoItemDbModel
 
-@Database(entities = [TodoItemDbModel::class], version = 1, exportSchema = false)
+@Database(entities = [TodoItemDbModel::class], version = 2, exportSchema = false)
 abstract class AppDataBase : RoomDatabase() {
 
     abstract fun todoListDao(): TodoListDao
@@ -13,7 +14,7 @@ abstract class AppDataBase : RoomDatabase() {
     companion object {
         private var INSTANCE: AppDataBase? = null
         private val LOCK = Any()
-        private const val DB_NAME = "todo_item.db"
+        private const val DB_NAME = "todo_list.db"
 
         fun getInstance(application: Application): AppDataBase {
             INSTANCE?.let {
