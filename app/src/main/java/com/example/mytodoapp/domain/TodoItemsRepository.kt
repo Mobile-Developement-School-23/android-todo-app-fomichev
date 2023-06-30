@@ -14,6 +14,8 @@ interface TodoItemsRepository {
 
     fun getTodoList(): LiveData<List<TodoItem>>
 
+    suspend fun syncLocalListOfTodo()
+
 
 
 }

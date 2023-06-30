@@ -58,7 +58,7 @@ class MainViewModel(private val repository: TodoListRepositoryImpl,
         }
     }
 
-    private fun loadData() {
+    fun loadData() {
         job = viewModelScope.launch(Dispatchers.IO) {
             _data.emitAll(repository.getAllData())
         }
@@ -77,5 +77,10 @@ class MainViewModel(private val repository: TodoListRepositoryImpl,
             countDoneItems.postValue(count)
         }
         return countDoneItems
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        job?.cancel()
     }
     }

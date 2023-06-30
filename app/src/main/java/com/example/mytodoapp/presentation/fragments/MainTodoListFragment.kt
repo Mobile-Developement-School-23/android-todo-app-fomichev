@@ -41,9 +41,8 @@ class MainTodoListFragment() : Fragment(){
         super.onViewCreated(view, savedInstanceState)
         initViews(view)
         setupRecyclerView()
-        viewModel.todoList.observe(viewLifecycleOwner) {
-            todoListAdapter.submitList(it.sortedBy { it.creationDate })
-        }
+        viewModel.loadData()
+
         buttonAddTodoItem.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.root_container, AddEditTodoItemFragment.newInstance(MODE_ADD))
@@ -64,8 +63,6 @@ class MainTodoListFragment() : Fragment(){
 
     }
 
-
-
     private fun initViews(view: View) {
         numberOfDoneTodo = view.findViewById(R.id.numberOfDoneTodo)
 
@@ -81,7 +78,6 @@ class MainTodoListFragment() : Fragment(){
                     true -> {
                         changeVisibility.setImageResource(R.drawable.ic_visible)
                     }
-
                     false -> {
                         changeVisibility.setImageResource(R.drawable.ic_invisible)
                     }
@@ -89,10 +85,7 @@ class MainTodoListFragment() : Fragment(){
         }
     }
 
-
-
     private fun setupRecyclerView() {
-
         todoListRecyclerView = requireActivity().findViewById(R.id.todoListRcView)
         todoListAdapter = TodoListAdapter()
         todoListRecyclerView.adapter = todoListAdapter
@@ -127,7 +120,6 @@ class MainTodoListFragment() : Fragment(){
             todoListAdapter.submitList(list.filter { !it.done }.sortedBy { it.creationDate })
         }
     }
-
 
     companion object {
 

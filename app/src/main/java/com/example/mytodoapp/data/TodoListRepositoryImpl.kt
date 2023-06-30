@@ -133,11 +133,9 @@ class TodoListRepositoryImpl(
                 }
                 updateNetworkList(mergedList.values.toList())
             }
-        } else {
-
         }
     }
-
+    override suspend fun syncLocalListOfTodo() = getNetworkData()
     private suspend fun updateNetworkList(mergedList: List<TodoItemResponse>) {
 
         val updateResponse = service.updateList(
