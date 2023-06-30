@@ -24,6 +24,12 @@ interface RetrofitService {
         @Body list: PatchListApiRequest
     ): Response<GetListApiResponse>
 
+    @PUT("list/{id}")
+    suspend fun updateElement(
+        @Path("id") id: String,
+        @Header("X-Last-Known-Revision") lastKnownRevision: Int,
+        @Body item: PostItemApiRequest
+    ): Response<PostItemApiResponse>
     @POST("list")
     suspend fun postElement(
         @Header("X-Last-Known-Revision") lastKnownRevision: Int,
@@ -36,10 +42,4 @@ interface RetrofitService {
         @Header("X-Last-Known-Revision") lastKnownRevision: Int,
     ): Response<PostItemApiResponse>
 
-    @PUT("list/{id}")
-    suspend fun updateElement(
-        @Path("id") id: String,
-        @Header("X-Last-Known-Revision") lastKnownRevision: Int,
-        @Body item: PostItemApiRequest
-    ): Response<PostItemApiResponse>
 }

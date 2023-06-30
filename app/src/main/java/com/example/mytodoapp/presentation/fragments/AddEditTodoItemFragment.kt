@@ -3,6 +3,7 @@ package com.example.mytodoapp.presentation.fragments
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,10 +45,8 @@ class AddEditTodoItemFragment : Fragment() {
     private lateinit var spinnerPriority: Spinner
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private lateinit var switchCalendar: Switch
-    private var  isCalendarVisible = true
+    private var  isCalendarVisible = false
     private var deadlineItem: Date? = NO_DEADLINE
-    @SuppressLint("SimpleDateFormat")
-    val simpleDateFormat = SimpleDateFormat("dd-MMMM-yyyy")
     private var creationDate = NO_CREATION_DATE
     var itemDone = false
     private var todoItemId: String = TodoItem.UNDEFINED_ID
@@ -68,8 +67,6 @@ class AddEditTodoItemFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-      //  viewModel = ViewModelProvider(this)[TodoItemViewModel::class.java]
-
         initViews(view)
         when (todoItemId) {
             MODE_ADD -> launchAddMode()
@@ -90,6 +87,7 @@ class AddEditTodoItemFragment : Fragment() {
 
     private fun launchEditMode() {
         viewModel.getTodoItem(todoItemId)
+        if (deadlineItem == NO_DEADLINE) initSwitchCalendar()
         viewModel.todoItem.observe(viewLifecycleOwner) {
             editTextDescription.setText(it.description)
             when (it.priority) {
@@ -97,13 +95,12 @@ class AddEditTodoItemFragment : Fragment() {
                Importance.LOW -> spinnerPriority.setSelection(1)
                 else -> spinnerPriority.setSelection(0)
             }
-            if (it.deadline != null) {
+            if (it.deadline != NO_DEADLINE) {
                 tvCalendar.text = it.deadline.toString()
                 tvCalendar.visibility = View.VISIBLE
                 switchCalendar.isChecked = true
                 deadlineItem = it.deadline
             } else  {
-                isCalendarVisible = false
                 tvCalendar.visibility = View.GONE
                 switchCalendar.isChecked = false
             }
@@ -111,6 +108,7 @@ class AddEditTodoItemFragment : Fragment() {
             creationDate = it.creationDate.toString()
             initSwitchCalendar()
         }
+
 
 
         saveButton.setOnClickListener {
@@ -150,6 +148,7 @@ class AddEditTodoItemFragment : Fragment() {
     }
 
     private fun launchAddMode() {
+        isCalendarVisible = true
         initSwitchCalendar()
         saveButton.setOnClickListener {
             val itemPriority =
@@ -166,7 +165,6 @@ class AddEditTodoItemFragment : Fragment() {
                 getString(R.string.toast_for_empty_edit_text),
                 Toast.LENGTH_SHORT
             ).show()
-
         }
         ibDeleteItem.setOnClickListener {
             openMainTodoListFragment()
@@ -193,7 +191,6 @@ class AddEditTodoItemFragment : Fragment() {
                 tvCalendar.visibility = View.GONE
                 deadlineItem = NO_DEADLINE
             }
-            isCalendarVisible = true
         }
     }
 
@@ -232,7 +229,6 @@ class AddEditTodoItemFragment : Fragment() {
             datePicker[Calendar.MONTH],
             datePicker[Calendar.DAY_OF_MONTH]
         ).show()
-        isCalendarVisible = true
     }
 
 

@@ -12,5 +12,3 @@ object ServiceLocator {
 }
 
 inline fun <reified T:Any> locale() = ServiceLocator.get(T::class)
-
-inline fun <reified T:Any> localeLazy():Lazy<T> = lazy { ServiceLocator.get(T::class) }

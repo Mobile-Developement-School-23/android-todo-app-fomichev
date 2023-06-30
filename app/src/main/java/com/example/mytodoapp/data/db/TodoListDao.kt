@@ -1,6 +1,5 @@
 package com.example.mytodoapp.data.db
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -9,9 +8,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TodoListDao {
-
-    @Query("SELECT * FROM todoList")
-    fun getShopList(): LiveData<List<TodoItemDbModel>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addShopItem(todoItemDbModel: TodoItemDbModel)

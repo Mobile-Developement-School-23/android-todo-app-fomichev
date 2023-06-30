@@ -24,7 +24,4 @@ class TodoListMapper {
         deadline = todoItemDbModel.deadline?.let { java.sql.Date(it) }
     )
 
-    fun mapListDbModelToListEntity(list:List<TodoItemDbModel>) = list.map {
-        mapDbModelToEntity(it)
-    }
 }

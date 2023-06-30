@@ -17,6 +17,8 @@ import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.lang.Exception
+import java.net.UnknownHostException
 import java.sql.Date
 
 
@@ -53,6 +55,7 @@ class TodoItemViewModel(private val repository: TodoListRepositoryImpl,
                 val todoItem = TodoItem(description, priority, done, creatingDate, changeDate, deadline, id)
                 addTodoItemUseCase.addTodoItem(todoItem)
                 if (connection.isOnline()) uploadNetworkItem(todoItem)
+                else sharedPreferencesHelper.isNotOnline = true
             }
         }
     }
@@ -68,6 +71,7 @@ class TodoItemViewModel(private val repository: TodoListRepositoryImpl,
                     val item = it.copy(description = description, priority=priority, done=done, changeDate=changeDate, deadline=deadline, id = id)
                     editTodoItemUseCase.editTodoItem(item)
                     if (connection.isOnline()) updateNetworkItem(item)
+                    else sharedPreferencesHelper.isNotOnline = true
                 }
             }
         }
@@ -77,6 +81,7 @@ class TodoItemViewModel(private val repository: TodoListRepositoryImpl,
         viewModelScope.launch {
             deleteShopItemUseCase.deleteTodoItem(todoItem)
             if (connection.isOnline()) deleteNetworkItem(todoItem.id)
+            else sharedPreferencesHelper.isNotOnline = true
         }
     }
 
@@ -88,27 +93,13 @@ class TodoItemViewModel(private val repository: TodoListRepositoryImpl,
                 is NetworkAccess.Success -> {
                     sharedPreferencesHelper.putRevision(response.data.revision)
                 }
-
                 is NetworkAccess.Error -> {
-
+                    sharedPreferencesHelper.networkAccessError = true
                 }
             }
         }
     }
 
-//    fun onSNACK(view: View){
-//
-//        val snackbar = Snackbar.make(view, "Replace with your own action",
-//            Snackbar.LENGTH_LONG).setAction("Action", null)
-//        snackbar.setActionTextColor(Color.BLUE)
-//        val snackbarView = snackbar.view
-//        snackbarView.setBackgroundColor(Color.LTGRAY)
-//        val textView =
-//            snackbarView.findViewById(com.google.android.material.R.id.snackbar_text) as TextView
-//        textView.setTextColor(Color.BLUE)
-//        textView.textSize = 28f
-//        snackbar.show()
-//    }
 
     private fun deleteNetworkItem(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -119,6 +110,7 @@ class TodoItemViewModel(private val repository: TodoListRepositoryImpl,
                     sharedPreferencesHelper.putRevision(response.data.revision)
                 }
                 is NetworkAccess.Error -> {
+                    sharedPreferencesHelper.networkAccessError = true
                 }
             }
         }

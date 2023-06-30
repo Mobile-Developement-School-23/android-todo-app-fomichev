@@ -1,8 +1,7 @@
 package com.example.mytodoapp.data
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
+import kotlinx.coroutines.withContext
 import com.example.mytodoapp.data.db.AppDataBase
 import com.example.mytodoapp.data.network.BaseUrl
 import com.example.mytodoapp.data.network.NetworkAccess
@@ -17,7 +16,7 @@ import com.example.mytodoapp.domain.TodoItemsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
+
 
 class TodoListRepositoryImpl(
     db: AppDataBase, private val sharedPreferencesHelper: SharedPreferencesHelper
@@ -44,16 +43,8 @@ class TodoListRepositoryImpl(
         return mapper.mapDbModelToEntity(dbModel)
     }
 
-    override fun getTodoList(): LiveData<List<TodoItem>> = MediatorLiveData<List<TodoItem>>().apply {
-        addSource(todoListDao.getShopList()) {
-            value = mapper.mapListDbModelToListEntity(it)
-        }
-    }
-
     fun getAllData(): Flow<List<TodoItem>> =
         todoListDao.getAllFlow().map { list -> list.map { it.toItem() } }
-
-
 
     suspend fun postNetworkItem(
         lastRevision: Int,
@@ -135,7 +126,7 @@ class TodoListRepositoryImpl(
             }
         }
     }
-    override suspend fun syncLocalListOfTodo() = getNetworkData()
+    override suspend fun syncListOfTodo() = getNetworkData()
     private suspend fun updateNetworkList(mergedList: List<TodoItemResponse>) {
 
         val updateResponse = service.updateList(

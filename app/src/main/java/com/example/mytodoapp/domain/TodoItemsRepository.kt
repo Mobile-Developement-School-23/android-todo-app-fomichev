@@ -1,7 +1,5 @@
 package com.example.mytodoapp.domain
 
-import androidx.lifecycle.LiveData
-
 interface TodoItemsRepository {
 
     suspend fun addTodoItem(todoItem: TodoItem)
@@ -12,9 +10,8 @@ interface TodoItemsRepository {
 
     suspend fun getTodoItem(todoItemId: String): TodoItem
 
-    fun getTodoList(): LiveData<List<TodoItem>>
+    suspend fun syncListOfTodo()
 
-    suspend fun syncLocalListOfTodo()
 
 
 

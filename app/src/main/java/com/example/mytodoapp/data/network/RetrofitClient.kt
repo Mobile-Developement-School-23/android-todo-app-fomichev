@@ -26,7 +26,6 @@ object RetrofitClient {
                 .retryOnConnectionFailure(true)
                 .addInterceptor(interceptor).build()
 
-
             retrofitClient = Retrofit.Builder()
                 .client(client)
                 .baseUrl(baseUrl)

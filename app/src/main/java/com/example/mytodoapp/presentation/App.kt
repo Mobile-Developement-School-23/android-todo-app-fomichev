@@ -2,7 +2,6 @@ package com.example.mytodoapp.presentation
 
 import android.app.Application
 import android.content.Context
-import androidx.work.Configuration
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType

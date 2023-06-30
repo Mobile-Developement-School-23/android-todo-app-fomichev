@@ -3,12 +3,14 @@ package com.example.mytodoapp.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.mytodoapp.data.network.BaseUrl
+import com.example.mytodoapp.presentation.fragments.MainTodoListFragment
 import java.util.UUID
 
 class SharedPreferencesHelper(context: Context){
     private val sharedPreferences: SharedPreferences
     private val editor: SharedPreferences.Editor
-
+    var networkAccessError = false
+    var isNotOnline = false
     init {
         sharedPreferences = context.getSharedPreferences("states", Context.MODE_PRIVATE)
         editor = sharedPreferences.edit()

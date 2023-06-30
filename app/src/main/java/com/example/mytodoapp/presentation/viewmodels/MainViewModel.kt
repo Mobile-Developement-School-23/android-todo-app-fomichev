@@ -8,25 +8,25 @@ import com.example.mytodoapp.data.TodoListRepositoryImpl
 import com.example.mytodoapp.data.network.CheckConnection
 import com.example.mytodoapp.data.SharedPreferencesHelper
 import com.example.mytodoapp.domain.usecases.EditTodoItemUseCase
-import com.example.mytodoapp.domain.usecases.GetTodoListUseCase
 import com.example.mytodoapp.domain.TodoItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainViewModel(private val repository: TodoListRepositoryImpl,
                     private val sharedPreferencesHelper: SharedPreferencesHelper,
                     private val connection: CheckConnection): ViewModel() {
 
-
-
-    private val getTodoListUseCase = GetTodoListUseCase(repository)
     private val editTodoItemUseCase = EditTodoItemUseCase(repository)
-    val todoList = getTodoListUseCase.getTodoList()
+
+
 
     var modeAll: Boolean = true
     private var job: Job? = null
@@ -44,6 +44,7 @@ class MainViewModel(private val repository: TodoListRepositoryImpl,
             val newItem = todoItem.copy(done = !todoItem.done)
             editTodoItemUseCase.editTodoItem(newItem)
             if (connection.isOnline()) updateNetworkItem(newItem)
+            else sharedPreferencesHelper.isNotOnline = true
         }
     }
 
@@ -71,10 +72,17 @@ class MainViewModel(private val repository: TodoListRepositoryImpl,
     }
 
     fun countItemsWithTrueDone(): LiveData<Int> {
+        val todoList: Flow<List<TodoItem>> = repository.getAllData()
         val countDoneItems = MutableLiveData<Int>()
+        val doneItemsCount = todoList.map { list ->
+            list.count { it.done }
+        }
         viewModelScope.launch(Dispatchers.IO) {
-            val count = todoList.value?.count { it.done } ?: 0
-            countDoneItems.postValue(count)
+            doneItemsCount.collect { count ->
+                withContext(Dispatchers.Main) {
+                    countDoneItems.value = count
+                }
+            }
         }
         return countDoneItems
     }
