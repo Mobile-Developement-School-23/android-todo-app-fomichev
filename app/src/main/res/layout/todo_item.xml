@@ -24,8 +24,8 @@
             android:button="@drawable/checkbox_selection"
             android:checked="false"
             app:buttonTint="@null"
-            android:minWidth="0dp"
-            android:minHeight="0dp" />
+            android:minWidth="48dp"
+            android:minHeight="48dp" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -95,8 +95,8 @@
             android:layout_gravity="center"
             android:background="@null"
             android:contentDescription="@string/item_info"
-            android:minWidth="20dp"
-            android:minHeight="20dp"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
             app:srcCompat="@drawable/ic_info" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

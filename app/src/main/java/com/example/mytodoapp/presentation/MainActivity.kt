@@ -3,6 +3,7 @@ package com.example.mytodoapp.presentation
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.mytodoapp.R
+import com.example.mytodoapp.presentation.fragments.MainTodoListFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -11,7 +12,5 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         supportFragmentManager.beginTransaction()
             .replace(R.id.root_container, MainTodoListFragment.newInstance()).commit()
-
     }
-
 }

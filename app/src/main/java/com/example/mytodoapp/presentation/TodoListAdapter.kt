@@ -1,6 +1,5 @@
 package com.example.mytodoapp.presentation
 
-import android.annotation.SuppressLint
 import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
@@ -10,24 +9,18 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mytodoapp.R
-import com.example.mytodoapp.TodoItem
-import com.example.mytodoapp.TodoItem.Companion.HIGH_IMPORTANCE
-import com.example.mytodoapp.TodoItem.Companion.LOW_IMPORTANCE
-import com.example.mytodoapp.TodoItem.Companion.NO_DEADLINE
+import com.example.mytodoapp.domain.Importance
+import com.example.mytodoapp.domain.TodoItem
 
-class TodoListAdapter(private val listener: OnTodoItemClickListener) :
-    RecyclerView.Adapter<TodoListAdapter.TodoListViewHolder>() {
 
-    var todoList = listOf<TodoItem>()
-        set(value) {
-            val callback = TodoListDiffCallback(todoList, value)
-            val diffResult = DiffUtil.calculateDiff(callback)
-            diffResult.dispatchUpdatesTo(this)
-            field = value
-        }
+class TodoListAdapter : ListAdapter<TodoItem, TodoListAdapter.TodoListViewHolder>(TodoItemDiffCallback())  {
 
+
+    var onTodoItemClickListener: OnTodoItemClickListener? = null
+    var onCheckboxItemClickListener: OnCheckboxItemClickListener? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoListViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(
             R.layout.todo_item,
@@ -39,7 +32,7 @@ class TodoListAdapter(private val listener: OnTodoItemClickListener) :
 
     override fun onBindViewHolder(holder: TodoListViewHolder, position: Int) = with(holder) {
 
-        val todoItem = todoList[position]
+        val todoItem = getItem(position)
         todoDescription.text = todoItem.description
         todoDone.isChecked = todoItem.done
 
@@ -47,13 +40,13 @@ class TodoListAdapter(private val listener: OnTodoItemClickListener) :
         else todoDescription.paintFlags = 0
 
         when (todoItem.priority) {
-            LOW_IMPORTANCE -> {
+            Importance.LOW -> {
                 buttonPriority.setBackgroundResource(R.drawable.ic_low_priority)
                 buttonPriority.visibility = View.VISIBLE
                 checkboxDone.setButtonDrawable(R.drawable.checkbox_selection)
             }
 
-            HIGH_IMPORTANCE -> {
+            Importance.HIGH -> {
                 buttonPriority.setBackgroundResource(R.drawable.ic_high_priority)
                 buttonPriority.visibility = View.VISIBLE
                 todoDone.setButtonDrawable(R.drawable.checkbox_selection_high)
@@ -66,24 +59,23 @@ class TodoListAdapter(private val listener: OnTodoItemClickListener) :
             }
         }
 
-        if (todoItem.deadline != NO_DEADLINE) {
+        if (todoItem.deadline != null) {
             tvDeadline.visibility = View.VISIBLE
-            tvDeadline.text = todoItem.deadline
+            tvDeadline.text = todoItem.deadline.toString()
         } else tvDeadline.visibility = View.GONE
 
-
         itemView.setOnClickListener {
-            listener.onTodoItemClick(todoItem)
+            onTodoItemClickListener?.onTodoItemClick(todoItem)
         }
         todoItemInfoButton.setOnClickListener {
-            listener.onTodoItemClick(todoItem)
+            onTodoItemClickListener?.onTodoItemClick(todoItem)
         }
+
         todoDone.setOnClickListener {
-            listener.onCheckboxItemClick(todoItem)
+            onCheckboxItemClickListener?.onCheckboxItemClick(todoItem)
         }
     }
 
-    override fun getItemCount() = todoList.size
 
 
     class TodoListViewHolder(todoItemView: View) : RecyclerView.ViewHolder(todoItemView) {
@@ -97,11 +89,12 @@ class TodoListAdapter(private val listener: OnTodoItemClickListener) :
 
     }
 
+
     interface OnTodoItemClickListener {
-
         fun onTodoItemClick(todoItem: TodoItem)
+    }
 
+    interface OnCheckboxItemClickListener {
         fun onCheckboxItemClick(todoItem: TodoItem)
-
     }
 }
