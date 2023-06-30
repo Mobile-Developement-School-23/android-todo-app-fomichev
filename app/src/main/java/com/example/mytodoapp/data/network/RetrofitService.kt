@@ -1,9 +1,9 @@
 package com.example.mytodoapp.data.network
 
-import com.example.mytodoapp.data.network.response.GetListApiResponse
-import com.example.mytodoapp.data.network.response.PatchListApiRequest
-import com.example.mytodoapp.data.network.response.PostItemApiRequest
-import com.example.mytodoapp.data.network.response.PostItemApiResponse
+import com.example.mytodoapp.data.api.GetListApiResponse
+import com.example.mytodoapp.data.api.PatchListApiRequest
+import com.example.mytodoapp.data.api.PostItemApiRequest
+import com.example.mytodoapp.data.api.PostItemApiResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE

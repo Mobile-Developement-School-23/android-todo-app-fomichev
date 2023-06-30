@@ -3,14 +3,15 @@ package com.example.mytodoapp.data
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
+import com.example.mytodoapp.data.db.AppDataBase
 import com.example.mytodoapp.data.network.BaseUrl
 import com.example.mytodoapp.data.network.NetworkAccess
-import com.example.mytodoapp.data.network.SharedPreferencesHelper
-import com.example.mytodoapp.data.network.TodoItemDbModel
-import com.example.mytodoapp.data.network.response.PatchListApiRequest
-import com.example.mytodoapp.data.network.response.PostItemApiRequest
-import com.example.mytodoapp.data.network.response.PostItemApiResponse
-import com.example.mytodoapp.data.network.response.TodoItemResponse
+import com.example.mytodoapp.data.db.TodoItemDbModel
+import com.example.mytodoapp.data.db.TodoListMapper
+import com.example.mytodoapp.data.api.PatchListApiRequest
+import com.example.mytodoapp.data.api.PostItemApiRequest
+import com.example.mytodoapp.data.api.PostItemApiResponse
+import com.example.mytodoapp.data.api.TodoItemResponse
 import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.domain.TodoItemsRepository
 import kotlinx.coroutines.Dispatchers
@@ -107,8 +108,6 @@ class TodoListRepositoryImpl(
 
     suspend fun getNetworkData() {
         val networkListResponse = service.getList()
-
-
         if (networkListResponse.isSuccessful) {
             val body = networkListResponse.body()
             if (body != null) {
@@ -132,9 +131,10 @@ class TodoListRepositoryImpl(
                         mergedList[item.id] = item
                     }
                 }
-
                 updateNetworkList(mergedList.values.toList())
             }
+        } else {
+
         }
     }
 
