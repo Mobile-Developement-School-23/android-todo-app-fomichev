@@ -1,30 +1,30 @@
-package com.example.mytodoapp.presentation.fragments
+package com.example.mytodoapp.presentation.ui
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mytodoapp.R
-import com.example.mytodoapp.data.SharedPreferencesHelper
 import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.presentation.viewmodels.MainViewModel
 import com.example.mytodoapp.presentation.TodoListAdapter
 import com.example.mytodoapp.presentation.viewmodels.factory
-import com.example.mytodoapp.presentation.fragments.AddEditTodoItemFragment.Companion.MODE_ADD
+import com.example.mytodoapp.presentation.ui.AddEditTodoItemFragment.Companion.MODE_ADD
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.imageview.ShapeableImageView
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-
+/**
+ * This class represents the MainTodoListFragment, which is responsible for displaying the main todo list.
+ * It extends the Fragment class and provides the UI for viewing and interacting with the todo items.
+ * The fragment initializes the views, sets up the RecyclerView, and interacts with the MainViewModel to load and update data.
+ */
 
 class MainTodoListFragment() : Fragment(){
     private lateinit var todoListRecyclerView: RecyclerView

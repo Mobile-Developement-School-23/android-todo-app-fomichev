@@ -11,18 +11,25 @@ import com.example.mytodoapp.data.api.PatchListApiRequest
 import com.example.mytodoapp.data.api.PostItemApiRequest
 import com.example.mytodoapp.data.api.PostItemApiResponse
 import com.example.mytodoapp.data.api.TodoItemResponse
+import com.example.mytodoapp.data.api.TodoItemResponseMapper
 import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.domain.TodoItemsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-
+/**
+ * The TodoListRepositoryImpl class is responsible for managing the interactions between the local database,
+ * the SharedPreferencesHelper, and the remote server API for TodoList items. It implements the TodoItemsRepository
+ * interface and provides methods for adding, deleting, editing, and retrieving TodoItems from the database.
+ * The class ensures synchronization between the local and remote data sources.
+ */
 class TodoListRepositoryImpl(
     db: AppDataBase, private val sharedPreferencesHelper: SharedPreferencesHelper
 ) : TodoItemsRepository {
-    private val service = BaseUrl.retrofitService
-
+    private val todoItemResponseMapper= TodoItemResponseMapper()
+    private val service = BaseUrl.retrofitApi
+    private val todoListMapper = TodoListMapper()
     private val mapper = TodoListMapper()
 
     private val todoListDao = db.listDao
@@ -52,7 +59,7 @@ class TodoListRepositoryImpl(
     ): NetworkAccess<PostItemApiResponse> {
         val postResponse = service.postElement(
             lastRevision,
-            PostItemApiRequest(TodoItemResponse.fromItem(newItem))
+            PostItemApiRequest(todoItemResponseMapper.mapToTodoItemResponse(newItem))
         )
 
         if (postResponse.isSuccessful) {
@@ -86,7 +93,7 @@ class TodoListRepositoryImpl(
 
         val updateItemResponse = service.updateElement(
             item.id, lastRevision, PostItemApiRequest(
-                TodoItemResponse.fromItem(item)
+                todoItemResponseMapper.mapToTodoItemResponse(item)
             )
         )
         if (updateItemResponse.isSuccessful) {
@@ -103,7 +110,7 @@ class TodoListRepositoryImpl(
             val body = networkListResponse.body()
             if (body != null) {
                 val networkList = body.list
-                val currentList = todoListDao.getAll().map { TodoItemResponse.fromItem(it.toItem()) }
+                val currentList = todoListDao.getAll().map { todoItemResponseMapper.mapToTodoItemResponse(it.toItem()) }
                 val mergedList = HashMap<String, TodoItemResponse>()
 
                 for(item in networkList){
@@ -146,7 +153,7 @@ class TodoListRepositoryImpl(
 
     private suspend fun updateRoom(response: List<TodoItemResponse>) {
         val list = response.map { it.toItem() }
-        todoListDao.addList(list.map { TodoItemDbModel.fromItem(it) })
+        todoListDao.addList(list.map { todoListMapper.mapEntityToDbModel(it) })
     }
 }
 

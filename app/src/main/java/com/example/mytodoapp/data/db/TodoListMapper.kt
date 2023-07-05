@@ -2,7 +2,12 @@ package com.example.mytodoapp.data.db
 
 import com.example.mytodoapp.domain.TodoItem
 
+
 class TodoListMapper {
+
+    /**
+     * Mapper from domain entity to local Database
+     */
 
     fun mapEntityToDbModel(todoItem: TodoItem) = TodoItemDbModel(
         id = todoItem.id,
@@ -13,6 +18,10 @@ class TodoListMapper {
         changedAt = todoItem.changeDate?.time,
         deadline = todoItem.deadline?.time
     )
+
+    /**
+     * Mapper from local Database to domain entity
+     */
 
     fun mapDbModelToEntity(todoItemDbModel: TodoItemDbModel) = TodoItem(
         id = todoItemDbModel.id,

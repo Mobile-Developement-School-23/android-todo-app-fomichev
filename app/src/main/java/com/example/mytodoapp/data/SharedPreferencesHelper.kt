@@ -3,9 +3,13 @@ package com.example.mytodoapp.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.mytodoapp.data.network.BaseUrl
-import com.example.mytodoapp.presentation.fragments.MainTodoListFragment
 import java.util.UUID
 
+/**
+ * This class provides a helper for managing shared preferences related to application states.
+ * It allows storing and retrieving various states, such as network access errors, online status,
+ * and the last revision number.
+ */
 class SharedPreferencesHelper(context: Context){
     private val sharedPreferences: SharedPreferences
     private val editor: SharedPreferences.Editor
@@ -26,6 +30,4 @@ class SharedPreferencesHelper(context: Context){
         editor.apply()
     }
     fun getLastRevision():Int = sharedPreferences.getInt("REVISION", 1)
-
-
 }

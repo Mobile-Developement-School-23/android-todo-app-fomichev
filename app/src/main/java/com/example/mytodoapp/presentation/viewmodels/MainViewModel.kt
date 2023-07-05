@@ -20,6 +20,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * This class represents the ViewModel class for the main functionality of the app.
+ * It handles the business logic and data management related to the main todo list.
+ */
 class MainViewModel(private val repository: TodoListRepositoryImpl,
                     private val sharedPreferencesHelper: SharedPreferencesHelper,
                     private val connection: CheckConnection): ViewModel() {

@@ -14,7 +14,12 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
-interface RetrofitService {
+/**
+ * The RetrofitApi interface defines the API endpoints for performing network operations.
+ * It contains functions for making HTTP requests to retrieve, update, create, and delete items in a list.
+ */
+
+interface RetrofitApi {
     @GET("list")
     suspend fun getList(): Response<GetListApiResponse>
 

@@ -3,6 +3,11 @@ package com.example.mytodoapp.data.network
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import javax.inject.Inject
+/**
+ * The CheckConnection class provides a utility for checking network connectivity.
+ * It determines whether the device is currently connected to the internet.
+ */
 
 class CheckConnection(
     private val context: Context

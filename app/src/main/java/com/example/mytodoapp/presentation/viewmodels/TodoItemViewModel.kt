@@ -21,6 +21,10 @@ import java.lang.Exception
 import java.net.UnknownHostException
 import java.sql.Date
 
+/**
+ * This class represents the ViewModel class for managing individual todo items.
+ * It handles the business logic and data management related to adding, editing, deleting todo items.
+ */
 
 class TodoItemViewModel(private val repository: TodoListRepositoryImpl,
                         private val sharedPreferencesHelper: SharedPreferencesHelper,

@@ -4,8 +4,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.mytodoapp.data.network.locale
-import com.example.mytodoapp.presentation.App
+import com.example.mytodoapp.App
 
+/**
+ * This class represents a ViewModelFactory that is responsible for creating instances of ViewModels.
+ * It implements the ViewModelProvider.Factory interface.
+ * The factory creates specific instances of ViewModels based on the requested modelClass.
+ */
 class ViewModelFactory(
     private val app: App
 ) : ViewModelProvider.Factory {

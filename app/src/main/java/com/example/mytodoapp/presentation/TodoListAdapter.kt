@@ -15,6 +15,10 @@ import com.example.mytodoapp.R
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
 
+/**
+ * This class represents the adapter for a RecyclerView used to display a list of TodoItems.
+ * It provides the necessary functionality to bind TodoItem data to the views in the list.
+ */
 
 class TodoListAdapter : ListAdapter<TodoItem, TodoListAdapter.TodoListViewHolder>(TodoItemDiffCallback())  {
 

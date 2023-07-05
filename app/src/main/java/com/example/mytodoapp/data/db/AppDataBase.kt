@@ -5,6 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+
+/**
+ * The AppDataBase class represents the Room database for the TodoList application.
+ * It provides access to the data access objects (DAOs) and manages the underlying SQLite database.
+ */
 @Database(entities = [TodoItemDbModel::class], version = 2, exportSchema = false)
 abstract class AppDataBase : RoomDatabase(){
     abstract val listDao: TodoListDao
