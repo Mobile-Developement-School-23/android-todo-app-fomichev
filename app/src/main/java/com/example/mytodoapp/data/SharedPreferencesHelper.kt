@@ -4,13 +4,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.example.mytodoapp.data.network.BaseUrl
 import java.util.UUID
+import javax.inject.Inject
 
 /**
  * This class provides a helper for managing shared preferences related to application states.
  * It allows storing and retrieving various states, such as network access errors, online status,
  * and the last revision number.
  */
-class SharedPreferencesHelper(context: Context){
+class SharedPreferencesHelper @Inject constructor(context: Context){
     private val sharedPreferences: SharedPreferences
     private val editor: SharedPreferences.Editor
     var networkAccessError = false

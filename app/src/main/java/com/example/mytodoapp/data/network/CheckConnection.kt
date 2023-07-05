@@ -9,7 +9,7 @@ import javax.inject.Inject
  * It determines whether the device is currently connected to the internet.
  */
 
-class CheckConnection(
+class CheckConnection  @Inject constructor (
     private val context: Context
 ) {
     fun isOnline(): Boolean {

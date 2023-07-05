@@ -4,6 +4,7 @@ import com.example.mytodoapp.data.network.BaseUrl
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
 import java.sql.Date
+import javax.inject.Inject
 
 /**
  * Maps a TodoItem object to a TodoItemResponse object.
@@ -11,7 +12,7 @@ import java.sql.Date
  * @return The mapped TodoItemResponse.
  */
 
-class TodoItemResponseMapper {
+class TodoItemResponseMapper @Inject constructor(){
 
     fun mapToTodoItemResponse(toDoItem: TodoItem): TodoItemResponse {
         return TodoItemResponse(
@@ -34,5 +35,6 @@ class TodoItemResponseMapper {
             updated_by = BaseUrl.updated_by
         )
     }
+
 }
 

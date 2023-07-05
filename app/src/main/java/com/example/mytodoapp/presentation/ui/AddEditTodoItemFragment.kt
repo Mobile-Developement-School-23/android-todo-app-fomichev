@@ -18,13 +18,16 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import com.example.mytodoapp.R
+import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
 
 import com.example.mytodoapp.domain.TodoItem.Companion.NO_DEADLINE
+import com.example.mytodoapp.presentation.viewmodels.MainViewModel
 import com.example.mytodoapp.presentation.viewmodels.TodoItemViewModel
-import com.example.mytodoapp.presentation.viewmodels.factory
+
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -35,7 +38,7 @@ import java.util.UUID.randomUUID
 
 class AddEditTodoItemFragment : Fragment() {
 
-    private val viewModel: TodoItemViewModel by  activityViewModels{factory()}
+
     private lateinit var tvCalendar: TextView
     private lateinit var editTextDescription: EditText
     private lateinit var saveButton: Button
@@ -49,7 +52,9 @@ class AddEditTodoItemFragment : Fragment() {
     private var creationDate = NO_CREATION_DATE
     var itemDone = false
     private var todoItemId: String = TodoItem.UNDEFINED_ID
-
+    private val viewModel: TodoItemViewModel by viewModels {
+        TodoItemViewModel.Factory( requireActivity().appComponent.injectTodoAddFragmentViewModel())
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -205,7 +210,7 @@ class AddEditTodoItemFragment : Fragment() {
 
     private fun setData() {
         val datePicker = Calendar.getInstance()
-        val date = DatePickerDialog.OnDateSetListener { view: DatePicker?, year: Int, month: Int, dayOfMonth: Int ->
+        val date = DatePickerDialog.OnDateSetListener { _: DatePicker?, year: Int, month: Int, dayOfMonth: Int ->
             datePicker[Calendar.YEAR] = year
             datePicker[Calendar.MONTH] = month
             datePicker[Calendar.DAY_OF_MONTH] = dayOfMonth

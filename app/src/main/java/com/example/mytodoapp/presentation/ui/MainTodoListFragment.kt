@@ -7,13 +7,15 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mytodoapp.R
+import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.presentation.viewmodels.MainViewModel
 import com.example.mytodoapp.presentation.TodoListAdapter
-import com.example.mytodoapp.presentation.viewmodels.factory
+
 import com.example.mytodoapp.presentation.ui.AddEditTodoItemFragment.Companion.MODE_ADD
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.imageview.ShapeableImageView
@@ -31,8 +33,10 @@ class MainTodoListFragment() : Fragment(){
     private lateinit var todoListAdapter: TodoListAdapter
     private lateinit var numberOfDoneTodo: TextView
     private lateinit var buttonAddTodoItem: FloatingActionButton
-    private val viewModel: MainViewModel by  activityViewModels{factory()}
 
+    private val viewModel: MainViewModel by viewModels {
+        MainViewModel.Factory( requireActivity().appComponent.injectMainViewModel())
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

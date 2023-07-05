@@ -12,7 +12,7 @@ import androidx.room.RoomDatabase
  */
 @Database(entities = [TodoItemDbModel::class], version = 2, exportSchema = false)
 abstract class AppDataBase : RoomDatabase(){
-    abstract val listDao: TodoListDao
+    abstract fun provideTodoDao(): TodoListDao
 
     companion object{
         fun create(context: Context) = Room.databaseBuilder(

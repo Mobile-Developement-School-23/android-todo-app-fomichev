@@ -4,6 +4,7 @@ package com.example.mytodoapp.presentation.viewmodels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.mytodoapp.data.TodoListRepositoryImpl
 import com.example.mytodoapp.data.network.CheckConnection
@@ -15,6 +16,8 @@ import com.example.mytodoapp.domain.usecases.EditTodoItemUseCase
 import com.example.mytodoapp.domain.usecases.GetTodoItemUseCase
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.Exception
@@ -26,17 +29,30 @@ import java.sql.Date
  * It handles the business logic and data management related to adding, editing, deleting todo items.
  */
 
-class TodoItemViewModel(private val repository: TodoListRepositoryImpl,
-                        private val sharedPreferencesHelper: SharedPreferencesHelper,
-                        private val connection: CheckConnection
+class TodoItemViewModel @AssistedInject constructor(
+    private val repository: TodoListRepositoryImpl,
+    private val sharedPreferencesHelper: SharedPreferencesHelper,
+    private val connection: CheckConnection,
+    private val getTodoItemUseCase: GetTodoItemUseCase,
+    private val addTodoItemUseCase: AddTodoItemUseCase,
+    private val editTodoItemUseCase: EditTodoItemUseCase,
+    private val deleteShopItemUseCase: DeleteTodoItemUseCase
 ) : ViewModel() {
 
+    @AssistedFactory
+    interface TodoItemViewModelFactory {
+        fun create(): TodoItemViewModel
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    class Factory(private val factory: TodoItemViewModelFactory) :
+        ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return factory.create() as T
+        }
+    }
 
 
-    private val getTodoItemUseCase = GetTodoItemUseCase(repository)
-    private val addTodoItemUseCase = AddTodoItemUseCase(repository)
-    private val editTodoItemUseCase = EditTodoItemUseCase(repository)
-    private val deleteShopItemUseCase = DeleteTodoItemUseCase(repository)
     private val _errorInputName = MutableLiveData<Boolean>()
 
 
@@ -51,12 +67,21 @@ class TodoItemViewModel(private val repository: TodoListRepositoryImpl,
         }
     }
 
-    fun addTodoItem(inputDescription: String?, priority: Importance, done: Boolean, creatingDate: Date, changeDate:Date?, deadline: Date?, id: String) {
+    fun addTodoItem(
+        inputDescription: String?,
+        priority: Importance,
+        done: Boolean,
+        creatingDate: Date,
+        changeDate: Date?,
+        deadline: Date?,
+        id: String
+    ) {
         val description = parseName(inputDescription)
         val fieldsValid = validateInput(description)
         if (fieldsValid) {
             viewModelScope.launch {
-                val todoItem = TodoItem(description, priority, done, creatingDate, changeDate, deadline, id)
+                val todoItem =
+                    TodoItem(description, priority, done, creatingDate, changeDate, deadline, id)
                 addTodoItemUseCase.addTodoItem(todoItem)
                 if (connection.isOnline()) uploadNetworkItem(todoItem)
                 else sharedPreferencesHelper.isNotOnline = true
@@ -65,14 +90,28 @@ class TodoItemViewModel(private val repository: TodoListRepositoryImpl,
     }
 
 
-
-    fun editTodoItem(inputDescription: String?, priority: Importance, done: Boolean, creatingDate: Date, changeDate:Date?, deadline: Date?, id: String) {
+    fun editTodoItem(
+        inputDescription: String?,
+        priority: Importance,
+        done: Boolean,
+        creatingDate: Date,
+        changeDate: Date?,
+        deadline: Date?,
+        id: String
+    ) {
         val description = parseName(inputDescription)
         val fieldsValid = validateInput(description)
         if (fieldsValid) {
             _todoItem.value?.let {
                 viewModelScope.launch {
-                    val item = it.copy(description = description, priority=priority, done=done, changeDate=changeDate, deadline=deadline, id = id)
+                    val item = it.copy(
+                        description = description,
+                        priority = priority,
+                        done = done,
+                        changeDate = changeDate,
+                        deadline = deadline,
+                        id = id
+                    )
                     editTodoItemUseCase.editTodoItem(item)
                     if (connection.isOnline()) updateNetworkItem(item)
                     else sharedPreferencesHelper.isNotOnline = true
@@ -97,6 +136,7 @@ class TodoItemViewModel(private val repository: TodoListRepositoryImpl,
                 is NetworkAccess.Success -> {
                     sharedPreferencesHelper.putRevision(response.data.revision)
                 }
+
                 is NetworkAccess.Error -> {
                     sharedPreferencesHelper.networkAccessError = true
                 }
@@ -107,12 +147,15 @@ class TodoItemViewModel(private val repository: TodoListRepositoryImpl,
 
     private fun deleteNetworkItem(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
+
             val response =
                 repository.deleteNetworkItem(sharedPreferencesHelper.getLastRevision(), id)
             when (response) {
                 is NetworkAccess.Success -> {
                     sharedPreferencesHelper.putRevision(response.data.revision)
+                    deleteTodoItem(todoItem.value!!)
                 }
+
                 is NetworkAccess.Error -> {
                     sharedPreferencesHelper.networkAccessError = true
                 }
@@ -122,7 +165,7 @@ class TodoItemViewModel(private val repository: TodoListRepositoryImpl,
 
     private fun updateNetworkItem(todoItem: TodoItem) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.updateNetworkItem(sharedPreferencesHelper.getLastRevision(), todoItem )
+            repository.updateNetworkItem(sharedPreferencesHelper.getLastRevision(), todoItem)
         }
     }
 

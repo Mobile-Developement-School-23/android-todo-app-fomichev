@@ -3,12 +3,15 @@ package com.example.mytodoapp.presentation.viewmodels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.mytodoapp.data.TodoListRepositoryImpl
 import com.example.mytodoapp.data.network.CheckConnection
 import com.example.mytodoapp.data.SharedPreferencesHelper
 import com.example.mytodoapp.domain.usecases.EditTodoItemUseCase
 import com.example.mytodoapp.domain.TodoItem
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -24,11 +27,22 @@ import kotlinx.coroutines.withContext
  * This class represents the ViewModel class for the main functionality of the app.
  * It handles the business logic and data management related to the main todo list.
  */
-class MainViewModel(private val repository: TodoListRepositoryImpl,
-                    private val sharedPreferencesHelper: SharedPreferencesHelper,
-                    private val connection: CheckConnection): ViewModel() {
+class MainViewModel @AssistedInject constructor(private val repository: TodoListRepositoryImpl,
+                                                private val sharedPreferencesHelper: SharedPreferencesHelper,
+                                                private val connection: CheckConnection,
+                                                private val editTodoItemUseCase: EditTodoItemUseCase): ViewModel() {
+    @AssistedFactory
+    interface MainViewModelFactory {
+        fun create(): MainViewModel
+    }
 
-    private val editTodoItemUseCase = EditTodoItemUseCase(repository)
+    @Suppress("UNCHECKED_CAST")
+    class Factory(private val factory: MainViewModelFactory) :
+        ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return factory.create() as T
+        }
+    }
 
 
 
