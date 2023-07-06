@@ -1,9 +1,9 @@
-package com.example.mytodoapp.data.api
+package com.example.mytodoapp.data.mappers
 
-import com.example.mytodoapp.data.network.BaseUrl
+import com.example.mytodoapp.data.api.TodoItemResponse
+import com.example.mytodoapp.data.network.Token
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
-import java.sql.Date
 import javax.inject.Inject
 
 /**
@@ -32,7 +32,7 @@ class TodoItemResponseMapper @Inject constructor(){
                     toDoItem.changeDate!!.time
                 }
             },
-            updated_by = BaseUrl.updated_by
+            updated_by = Token.updated_by
         )
     }
 

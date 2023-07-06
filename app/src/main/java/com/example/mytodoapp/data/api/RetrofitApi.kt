@@ -1,4 +1,4 @@
-package com.example.mytodoapp.data.network
+package com.example.mytodoapp.data.api
 
 import com.example.mytodoapp.data.api.GetListApiResponse
 import com.example.mytodoapp.data.api.PatchListApiRequest

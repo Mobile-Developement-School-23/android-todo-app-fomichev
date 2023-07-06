@@ -57,7 +57,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun changeEnableState(todoItem: TodoItem) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val newItem = todoItem.copy(done = !todoItem.done)
             editTodoItemUseCase.editTodoItem(newItem)
             if (connection.isOnline()) updateNetworkItem(newItem)
@@ -97,9 +97,7 @@ class MainViewModel @Inject constructor(
         }
         viewModelScope.launch(Dispatchers.IO) {
             doneItemsCount.collect { count ->
-                withContext(Dispatchers.Main) {
-                    countDoneItems.value = count
-                }
+                withContext(Dispatchers.Main) { countDoneItems.value = count }
             }
         }
         return countDoneItems

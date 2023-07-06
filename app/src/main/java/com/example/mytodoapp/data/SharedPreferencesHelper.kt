@@ -2,7 +2,7 @@ package com.example.mytodoapp.data
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.example.mytodoapp.data.network.BaseUrl
+import com.example.mytodoapp.data.network.Token
 import java.util.UUID
 import javax.inject.Inject
 
@@ -23,7 +23,7 @@ class SharedPreferencesHelper @Inject constructor(context: Context){
             editor.putString("UID", UUID.randomUUID().toString())
             editor.apply()
         }
-        BaseUrl.updated_by = sharedPreferences.getString("UID", "-1").toString()
+        Token.updated_by = sharedPreferences.getString("UID", "-1").toString()
     }
 
     fun putRevision(revision:Int){

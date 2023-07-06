@@ -1,6 +1,5 @@
 package com.example.mytodoapp.data.api
 
-import com.example.mytodoapp.data.network.BaseUrl
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
 import com.google.gson.annotations.SerializedName

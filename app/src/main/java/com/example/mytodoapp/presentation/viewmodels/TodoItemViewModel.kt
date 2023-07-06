@@ -45,11 +45,7 @@ class TodoItemViewModel @Inject constructor(
     private val deleteShopItemUseCase: DeleteTodoItemUseCase
 ) : ViewModel() {
 
-
-
     private val _errorInputName = MutableLiveData<Boolean>()
-
-
     private val _todoItem = MutableLiveData<TodoItem>()
     val todoItem: LiveData<TodoItem>
         get() = _todoItem
@@ -73,7 +69,7 @@ class TodoItemViewModel @Inject constructor(
         val description = parseName(inputDescription)
         val fieldsValid = validateInput(description)
         if (fieldsValid) {
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
                 val todoItem =
                     TodoItem(description, priority, done, creatingDate, changeDate, deadline, id)
                 addTodoItemUseCase.addTodoItem(todoItem)
@@ -83,6 +79,13 @@ class TodoItemViewModel @Inject constructor(
         }
     }
 
+    fun deleteTodoItem(todoItem: TodoItem) {
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteShopItemUseCase.deleteTodoItem(todoItem)
+            if (connection.isOnline()) deleteNetworkItem(todoItem.id)
+            else sharedPreferencesHelper.isNotOnline = true
+        }
+    }
 
     fun editTodoItem(
         inputDescription: String?,
@@ -97,7 +100,7 @@ class TodoItemViewModel @Inject constructor(
         val fieldsValid = validateInput(description)
         if (fieldsValid) {
             _todoItem.value?.let {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     val item = it.copy(
                         description = description,
                         priority = priority,
@@ -108,17 +111,8 @@ class TodoItemViewModel @Inject constructor(
                     )
                     editTodoItemUseCase.editTodoItem(item)
                     if (connection.isOnline()) updateNetworkItem(item)
-                    else sharedPreferencesHelper.isNotOnline = true
-                }
+                    else sharedPreferencesHelper.isNotOnline = true }
             }
-        }
-    }
-
-    fun deleteTodoItem(todoItem: TodoItem) {
-        viewModelScope.launch {
-            deleteShopItemUseCase.deleteTodoItem(todoItem)
-            if (connection.isOnline()) deleteNetworkItem(todoItem.id)
-            else sharedPreferencesHelper.isNotOnline = true
         }
     }
 
@@ -127,13 +121,10 @@ class TodoItemViewModel @Inject constructor(
             val response =
                 repository.postNetworkItem(sharedPreferencesHelper.getLastRevision(), todoItem)
             when (response) {
-                is NetworkAccess.Success -> {
-                    sharedPreferencesHelper.putRevision(response.data.revision)
-                }
+                is NetworkAccess.Success -> sharedPreferencesHelper
+                    .putRevision(response.data.revision)
 
-                is NetworkAccess.Error -> {
-                    sharedPreferencesHelper.networkAccessError = true
-                }
+                is NetworkAccess.Error -> sharedPreferencesHelper.networkAccessError = true
             }
         }
     }
@@ -144,13 +135,10 @@ class TodoItemViewModel @Inject constructor(
             val response =
                 repository.deleteNetworkItem(sharedPreferencesHelper.getLastRevision(), id)
             when (response) {
-                is NetworkAccess.Success -> {
-                    sharedPreferencesHelper.putRevision(response.data.revision)
-                }
+                is NetworkAccess.Success -> sharedPreferencesHelper
+                    .putRevision(response.data.revision)
 
-                is NetworkAccess.Error -> {
-                    sharedPreferencesHelper.networkAccessError = true
-                }
+                is NetworkAccess.Error -> sharedPreferencesHelper.networkAccessError = true
             }
         }
     }

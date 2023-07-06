@@ -2,22 +2,19 @@ package com.example.mytodoapp.data
 
 import android.util.Log
 import kotlinx.coroutines.withContext
-import com.example.mytodoapp.data.network.BaseUrl
+import com.example.mytodoapp.data.network.Token
 import com.example.mytodoapp.data.network.NetworkAccess
-import com.example.mytodoapp.data.db.TodoListMapper
 import com.example.mytodoapp.data.api.PatchListApiRequest
 import com.example.mytodoapp.data.api.PostItemApiRequest
 import com.example.mytodoapp.data.api.PostItemApiResponse
 import com.example.mytodoapp.data.api.TodoItemResponse
-import com.example.mytodoapp.data.api.TodoItemResponseMapper
-import com.example.mytodoapp.data.db.TodoListDaoImpl
+import com.example.mytodoapp.data.mappers.TodoItemResponseMapper
+import com.example.mytodoapp.data.db.TodoLocalDbImpl
 import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.domain.TodoItemsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 /**
@@ -27,37 +24,37 @@ import javax.inject.Inject
  * The class ensures synchronization between the local and remote data sources.
  */
 class TodoListRepositoryImpl @Inject constructor(
-    private val todoListDaoImpl: TodoListDaoImpl,
+    private val todoLocaldatabase: TodoLocalDbImpl,
     private val sharedPreferencesHelper: SharedPreferencesHelper,
     private val todoItemResponseMapper: TodoItemResponseMapper
 ) : TodoItemsRepository {
 
-    private val service = BaseUrl.retrofitApi
+    private val service = Token.retrofitApi
 
 
 
     override suspend fun addTodoItem(todoItem: TodoItem) {
         Log.d("MyLog", "addTodoItem in TodoListRepositoryImpl")
-        todoListDaoImpl.addTodoItem(todoItem)
+        todoLocaldatabase.addTodoItem(todoItem)
     }
 
     override suspend fun deleteTodoItem(todoItem: TodoItem) {
         Log.d("MyLog", "(deleteTodoItem in TodoListRepositoryImpl)")
 
-        todoListDaoImpl.deleteTodoItem(todoItem)
+        todoLocaldatabase.deleteTodoItem(todoItem)
     }
 
     override suspend fun editTodoItem(todoItem: TodoItem) {
         Log.d("MyLog", "editTodoItem in TodoListRepositoryImpl")
-        todoListDaoImpl.editTodoItem(todoItem)
+        todoLocaldatabase.editTodoItem(todoItem)
     }
 
     override suspend fun getTodoItem(todoItemId: String): TodoItem {
         Log.d("MyLog", "getTodoItem in TodoListRepositoryImpl")
-        return todoListDaoImpl.getTodoItem(todoItemId)
+        return todoLocaldatabase.getTodoItem(todoItemId)
     }
 
-    fun getAllData(): Flow<List<TodoItem>> = todoListDaoImpl.getAllData().map { list -> list.map { it.toItem() } }
+    fun getAllData(): Flow<List<TodoItem>> = todoLocaldatabase.getAllData().map { list -> list.map { it.toItem() } }
 
 
 
@@ -126,7 +123,7 @@ class TodoListRepositoryImpl @Inject constructor(
             val body = networkListResponse.body()
             if (body != null) {
                 val networkList = body.list
-                val currentList = todoListDaoImpl.getAll()
+                val currentList = todoLocaldatabase.getAll()
                     .map { todoItemResponseMapper.mapToTodoItemResponse(it.toItem()) }
                 val mergedList = HashMap<String, TodoItemResponse>()
 
@@ -175,7 +172,7 @@ class TodoListRepositoryImpl @Inject constructor(
     private suspend fun updateRoom(response: List<TodoItemResponse>) {
         Log.d("MyLog", "updateRoom in TodoListRepositoryImpl")
         val list = response.map { it.toItem() }
-        todoListDaoImpl.addList(list)
+        todoLocaldatabase.addList(list)
     }
 }
 

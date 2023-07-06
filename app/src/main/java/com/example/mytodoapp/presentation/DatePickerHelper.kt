@@ -1,4 +1,4 @@
-package com.example.mytodoapp.presentation.ui
+package com.example.mytodoapp.presentation
 
 import android.app.DatePickerDialog
 import android.widget.DatePicker

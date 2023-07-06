@@ -17,7 +17,7 @@ import javax.inject.Inject
  * It implements the ViewModelProvider.Factory interface.
  * The factory creates specific instances of ViewModels based on the requested modelClass.
  */
-@ApplicationScope
+
 class ViewModelFactory @Inject constructor(
     private val repository: TodoListRepositoryImpl,
     private val sharedPreferencesHelper: SharedPreferencesHelper,
