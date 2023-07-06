@@ -1,5 +1,6 @@
 package com.example.mytodoapp.presentation.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,27 +23,17 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 /**
  * This class represents the ViewModel class for the main functionality of the app.
  * It handles the business logic and data management related to the main todo list.
  */
-class MainViewModel @AssistedInject constructor(private val repository: TodoListRepositoryImpl,
-                                                private val sharedPreferencesHelper: SharedPreferencesHelper,
-                                                private val connection: CheckConnection,
-                                                private val editTodoItemUseCase: EditTodoItemUseCase): ViewModel() {
-    @AssistedFactory
-    interface MainViewModelFactory {
-        fun create(): MainViewModel
-    }
+class MainViewModel @Inject constructor(private val repository: TodoListRepositoryImpl,
+                                        private val sharedPreferencesHelper: SharedPreferencesHelper,
+                                        private val connection: CheckConnection,
+                                        private val editTodoItemUseCase: EditTodoItemUseCase): ViewModel() {
 
-    @Suppress("UNCHECKED_CAST")
-    class Factory(private val factory: MainViewModelFactory) :
-        ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return factory.create() as T
-        }
-    }
 
 
 
@@ -53,6 +44,7 @@ class MainViewModel @AssistedInject constructor(private val repository: TodoList
     val data: SharedFlow<List<TodoItem>> = _data.asSharedFlow()
     init {
         if(connection.isOnline()){
+            Log.d("MyLog", "111")
             loadNetworkList()
         }
         loadData()

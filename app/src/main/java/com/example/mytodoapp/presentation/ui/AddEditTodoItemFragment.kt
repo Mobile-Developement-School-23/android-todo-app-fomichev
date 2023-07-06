@@ -19,6 +19,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
+import com.example.mytodoapp.App
 import com.example.mytodoapp.R
 import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.domain.Importance
@@ -27,6 +29,7 @@ import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.domain.TodoItem.Companion.NO_DEADLINE
 import com.example.mytodoapp.presentation.viewmodels.MainViewModel
 import com.example.mytodoapp.presentation.viewmodels.TodoItemViewModel
+import com.example.mytodoapp.presentation.viewmodels.ViewModelFactory
 
 
 import java.text.SimpleDateFormat
@@ -34,6 +37,7 @@ import java.util.Calendar
 import java.sql.Date
 import java.util.Locale
 import java.util.UUID.randomUUID
+import javax.inject.Inject
 
 
 class AddEditTodoItemFragment : Fragment() {
@@ -52,8 +56,14 @@ class AddEditTodoItemFragment : Fragment() {
     private var creationDate = NO_CREATION_DATE
     var itemDone = false
     private var todoItemId: String = TodoItem.UNDEFINED_ID
-    private val viewModel: TodoItemViewModel by viewModels {
-        TodoItemViewModel.Factory( requireActivity().appComponent.injectTodoAddFragmentViewModel())
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
+    private val viewModel by lazy {
+        ViewModelProvider(this, viewModelFactory)[TodoItemViewModel::class.java]
+    }
+    private val component by lazy {
+        (activity?.application as App).appComponent
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +80,7 @@ class AddEditTodoItemFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        component.injectTodoAddFragmentViewModel(this)
         super.onViewCreated(view, savedInstanceState)
         initViews(view)
         when (todoItemId) {

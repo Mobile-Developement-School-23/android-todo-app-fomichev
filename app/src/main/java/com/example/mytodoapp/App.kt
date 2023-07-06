@@ -32,6 +32,7 @@ import javax.inject.Inject
  */
 
 class App() : Application() {
+
     lateinit var appComponent: AppComponent
     @Inject
     lateinit var todoListDaoImpl: TodoListDaoImpl

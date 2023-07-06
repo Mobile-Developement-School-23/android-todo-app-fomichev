@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.mytodoapp.App
 import com.example.mytodoapp.data.TodoListRepositoryImpl
 import com.example.mytodoapp.data.network.CheckConnection
 import com.example.mytodoapp.data.network.NetworkAccess
@@ -23,13 +24,14 @@ import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.net.UnknownHostException
 import java.sql.Date
+import javax.inject.Inject
 
 /**
  * This class represents the ViewModel class for managing individual todo items.
  * It handles the business logic and data management related to adding, editing, deleting todo items.
  */
 
-class TodoItemViewModel @AssistedInject constructor(
+class TodoItemViewModel @Inject constructor(
     private val repository: TodoListRepositoryImpl,
     private val sharedPreferencesHelper: SharedPreferencesHelper,
     private val connection: CheckConnection,
@@ -39,18 +41,6 @@ class TodoItemViewModel @AssistedInject constructor(
     private val deleteShopItemUseCase: DeleteTodoItemUseCase
 ) : ViewModel() {
 
-    @AssistedFactory
-    interface TodoItemViewModelFactory {
-        fun create(): TodoItemViewModel
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    class Factory(private val factory: TodoItemViewModelFactory) :
-        ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return factory.create() as T
-        }
-    }
 
 
     private val _errorInputName = MutableLiveData<Boolean>()
@@ -147,13 +137,11 @@ class TodoItemViewModel @AssistedInject constructor(
 
     private fun deleteNetworkItem(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
-
             val response =
                 repository.deleteNetworkItem(sharedPreferencesHelper.getLastRevision(), id)
             when (response) {
                 is NetworkAccess.Success -> {
                     sharedPreferencesHelper.putRevision(response.data.revision)
-                    deleteTodoItem(todoItem.value!!)
                 }
 
                 is NetworkAccess.Error -> {

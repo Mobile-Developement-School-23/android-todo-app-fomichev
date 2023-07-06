@@ -8,19 +8,26 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mytodoapp.App
 import com.example.mytodoapp.R
 import com.example.mytodoapp.appComponent
+import com.example.mytodoapp.di.AppComponent
 import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.presentation.viewmodels.MainViewModel
 import com.example.mytodoapp.presentation.TodoListAdapter
 
 import com.example.mytodoapp.presentation.ui.AddEditTodoItemFragment.Companion.MODE_ADD
+import com.example.mytodoapp.presentation.viewmodels.ViewModelFactory
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.imageview.ShapeableImageView
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * This class represents the MainTodoListFragment, which is responsible for displaying the main todo list.
@@ -33,10 +40,13 @@ class MainTodoListFragment() : Fragment(){
     private lateinit var todoListAdapter: TodoListAdapter
     private lateinit var numberOfDoneTodo: TextView
     private lateinit var buttonAddTodoItem: FloatingActionButton
-
-    private val viewModel: MainViewModel by viewModels {
-        MainViewModel.Factory( requireActivity().appComponent.injectMainViewModel())
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+lateinit var viewModel:MainViewModel
+    private val component by lazy {
+        (activity?.application as App).appComponent
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -46,7 +56,10 @@ class MainTodoListFragment() : Fragment(){
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        component.injectMainViewModel(this)
+
         super.onViewCreated(view, savedInstanceState)
+        viewModel = ViewModelProvider(requireActivity(), viewModelFactory)[MainViewModel::class.java]
         initViews(view)
         setupRecyclerView()
         viewModel.loadData()

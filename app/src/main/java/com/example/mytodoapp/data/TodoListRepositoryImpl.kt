@@ -16,6 +16,8 @@ import com.example.mytodoapp.domain.TodoItemsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 /**
@@ -35,29 +37,36 @@ class TodoListRepositoryImpl @Inject constructor(
 
 
     override suspend fun addTodoItem(todoItem: TodoItem) {
+        Log.d("MyLog", "addTodoItem in TodoListRepositoryImpl")
         todoListDaoImpl.addTodoItem(todoItem)
     }
 
     override suspend fun deleteTodoItem(todoItem: TodoItem) {
+        Log.d("MyLog", "(deleteTodoItem in TodoListRepositoryImpl)")
+
         todoListDaoImpl.deleteTodoItem(todoItem)
     }
 
     override suspend fun editTodoItem(todoItem: TodoItem) {
+        Log.d("MyLog", "editTodoItem in TodoListRepositoryImpl")
         todoListDaoImpl.editTodoItem(todoItem)
     }
 
     override suspend fun getTodoItem(todoItemId: String): TodoItem {
+        Log.d("MyLog", "getTodoItem in TodoListRepositoryImpl")
         return todoListDaoImpl.getTodoItem(todoItemId)
     }
 
-    fun getAllData(): Flow<List<TodoItem>> =
-        todoListDaoImpl.getAllData().map { list -> list.map { it.toItem() } }
+    fun getAllData(): Flow<List<TodoItem>> = todoListDaoImpl.getAllData().map { list -> list.map { it.toItem() } }
+
+
 
 
     suspend fun postNetworkItem(
         lastRevision: Int,
         newItem: TodoItem
     ): NetworkAccess<PostItemApiResponse> {
+        Log.d("MyLog", "postNetworkItem in TodoListRepositoryImpl")
         val postResponse = service.postElement(
             lastRevision,
             PostItemApiRequest(todoItemResponseMapper.mapToTodoItemResponse(newItem))
@@ -76,23 +85,26 @@ class TodoListRepositoryImpl @Inject constructor(
         lastRevision: Int,
         id: String
     ): NetworkAccess<PostItemApiResponse> {
-        val postResponse = service.deleteElement(id, lastRevision)
 
-        if (postResponse.isSuccessful) {
-            val responseBody = postResponse.body()
-            if (responseBody != null) {
-                return NetworkAccess.Success(responseBody)
+            Log.d("MyLog", "deleteNetworkItem in TodoListRepositoryImpl")
+            val postResponse = service.deleteElement(id, lastRevision)
 
+            if (postResponse.isSuccessful) {
+                val responseBody = postResponse.body()
+                if (responseBody != null) {
+                    return NetworkAccess.Success(responseBody)
+
+                }
             }
+            return NetworkAccess.Error(postResponse)
         }
-        return NetworkAccess.Error(postResponse)
-    }
+
 
     suspend fun updateNetworkItem(
         lastRevision: Int,
         item: TodoItem
     ) = withContext(Dispatchers.IO) {
-
+        Log.d("MyLog", "updateNetworkItem in TodoListRepositoryImpl")
         val updateItemResponse = service.updateElement(
             item.id, lastRevision, PostItemApiRequest(
                 todoItemResponseMapper.mapToTodoItemResponse(item)
@@ -107,8 +119,10 @@ class TodoListRepositoryImpl @Inject constructor(
     }
 
     suspend fun getNetworkData() {
+
         val networkListResponse = service.getList()
         if (networkListResponse.isSuccessful) {
+            Log.d("MyLog", "getNetworkData in TodoListRepositoryImpl")
             val body = networkListResponse.body()
             if (body != null) {
                 val networkList = body.list
@@ -120,6 +134,7 @@ class TodoListRepositoryImpl @Inject constructor(
                     mergedList[item.id] = item
                 }
                 for (item in currentList) {
+
                     if (mergedList.containsKey(item.id)) {
                         val item1 = mergedList[item.id]
                         if (item.dateChanged > item1!!.dateChanged) {
@@ -132,6 +147,7 @@ class TodoListRepositoryImpl @Inject constructor(
                     }
                 }
                 updateNetworkList(mergedList.values.toList())
+
             }
         }
     }
@@ -139,22 +155,25 @@ class TodoListRepositoryImpl @Inject constructor(
     override suspend fun syncListOfTodo() = getNetworkData()
     private suspend fun updateNetworkList(mergedList: List<TodoItemResponse>) {
 
-        val updateResponse = service.updateList(
-            sharedPreferencesHelper.getLastRevision(),
-            PatchListApiRequest(mergedList)
-        )
+            Log.d("MyLog", "updateNetworkList in TodoListRepositoryImpl")
+            val updateResponse = service.updateList(
+                sharedPreferencesHelper.getLastRevision(),
+                PatchListApiRequest(mergedList)
+            )
 
 
-        if (updateResponse.isSuccessful) {
-            val responseBody = updateResponse.body()
-            if (responseBody != null) {
-                sharedPreferencesHelper.putRevision(responseBody.revision)
-                updateRoom(responseBody.list)
+            if (updateResponse.isSuccessful) {
+                val responseBody = updateResponse.body()
+                if (responseBody != null) {
+                    sharedPreferencesHelper.putRevision(responseBody.revision)
+                    updateRoom(responseBody.list)
+                }
             }
         }
-    }
+
 
     private suspend fun updateRoom(response: List<TodoItemResponse>) {
+        Log.d("MyLog", "updateRoom in TodoListRepositoryImpl")
         val list = response.map { it.toItem() }
         todoListDaoImpl.addList(list)
     }
