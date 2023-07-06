@@ -11,11 +11,9 @@ import com.example.mytodoapp.data.SharedPreferencesHelper
 import com.example.mytodoapp.data.TodoListRepositoryImpl
 import com.example.mytodoapp.data.api.TodoItemResponseMapper
 import com.example.mytodoapp.data.db.AppDataBase
-import com.example.mytodoapp.data.db.TodoListDao
 import com.example.mytodoapp.data.db.TodoListDaoImpl
 import com.example.mytodoapp.data.network.CheckConnection
 import com.example.mytodoapp.data.network.ServiceLocator
-
 import com.example.mytodoapp.di.AppComponent
 import com.example.mytodoapp.di.ApplicationModule
 import com.example.mytodoapp.di.DaggerAppComponent
@@ -24,20 +22,23 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 /**
- * This class represents the application class of the Android application.
- * It extends the Application class and is responsible for initializing the application and setting
- * up various components.
- * The class registers dependencies using ServiceLocator, sets up periodic background work using WorkManager,
- * and performs other initialization tasks such as registering SharedPreferencesHelper and database instances.
+ * This class represents the main Application class of the Android application.
+ * It is responsible for initializing the application, setting up dependencies,
+ * and registering components.
+ * The class follows the single responsibility principle by focusing on the specific task
+ * of managing the application lifecycle.
  */
 
 class App() : Application() {
 
     lateinit var appComponent: AppComponent
+
     @Inject
     lateinit var todoListDaoImpl: TodoListDaoImpl
+
     @Inject
     lateinit var todoItemResponseMapper: TodoItemResponseMapper
+
     @Inject
     lateinit var sharedPreferencesHelper: SharedPreferencesHelper
 
@@ -58,7 +59,13 @@ class App() : Application() {
         ServiceLocator.register<Context>(this)
         ServiceLocator.register(SharedPreferencesHelper(applicationContext))
         ServiceLocator.register(AppDataBase.create(ServiceLocator.get(Context::class)))
-        ServiceLocator.register(TodoListRepositoryImpl(todoListDaoImpl, sharedPreferencesHelper,todoItemResponseMapper))
+        ServiceLocator.register(
+            TodoListRepositoryImpl(
+                todoListDaoImpl,
+                sharedPreferencesHelper,
+                todoItemResponseMapper
+            )
+        )
         ServiceLocator.register(CheckConnection(applicationContext))
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(

@@ -1,16 +1,20 @@
 package com.example.mytodoapp.di
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.provider.SyncStateContract
 import dagger.Module
 import dagger.Provides
-import javax.inject.Singleton
 
+/**
+ * This module provides the application context for dependency injection.
+ * It is responsible for providing the application context to other components and follows
+ * the single responsibility principle by focusing on the task of providing the context.
+ *
+ * @param context The application context.
+ */
 @Module
 class ApplicationModule(private val context: Context) {
 
-    @Singleton
+    @ApplicationScope
     @Provides
     fun provideContext(): Context {
         return context

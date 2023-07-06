@@ -74,7 +74,7 @@
             android:fontFamily="@font/roboto_medium"/>
 
         <Spinner
-            android:id="@+id/spinner_important"
+            android:id="@+id/spinnerPriority"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"

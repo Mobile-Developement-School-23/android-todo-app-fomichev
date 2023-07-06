@@ -4,15 +4,12 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.mytodoapp.data.SharedPreferencesHelper
 import com.example.mytodoapp.data.TodoListRepositoryImpl
 import com.example.mytodoapp.data.network.CheckConnection
-import com.example.mytodoapp.data.SharedPreferencesHelper
-import com.example.mytodoapp.domain.usecases.EditTodoItemUseCase
 import com.example.mytodoapp.domain.TodoItem
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import com.example.mytodoapp.domain.usecases.EditTodoItemUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -26,15 +23,23 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * This class represents the ViewModel class for the main functionality of the app.
- * It handles the business logic and data management related to the main todo list.
+ * This class represents the ViewModel for the main screen of the application. It provides data and logic
+ * for managing the main todo list, including loading data, changing the display mode, changing the enable state
+ * of a todo item, counting the number of completed items, and updating items in the network.
+ * The ViewModel follows the single responsibility principle by focusing on the specific task of managing the main todo list.
+ *
+ *
+ * @property repository The TodoListRepositoryImpl instance for data access and manipulation.
+ * @property sharedPreferencesHelper The SharedPreferencesHelper instance for managing shared preferences.
+ * @property connection The CheckConnection instance for checking network connectivity.
+ * @property editTodoItemUseCase The EditTodoItemUseCase instance for editing todo items.
  */
-class MainViewModel @Inject constructor(private val repository: TodoListRepositoryImpl,
-                                        private val sharedPreferencesHelper: SharedPreferencesHelper,
-                                        private val connection: CheckConnection,
-                                        private val editTodoItemUseCase: EditTodoItemUseCase): ViewModel() {
-
-
+class MainViewModel @Inject constructor(
+    private val repository: TodoListRepositoryImpl,
+    private val sharedPreferencesHelper: SharedPreferencesHelper,
+    private val connection: CheckConnection,
+    private val editTodoItemUseCase: EditTodoItemUseCase
+) : ViewModel() {
 
 
     var modeAll: Boolean = true
@@ -42,13 +47,15 @@ class MainViewModel @Inject constructor(private val repository: TodoListReposito
 
     private val _data = MutableSharedFlow<List<TodoItem>>()
     val data: SharedFlow<List<TodoItem>> = _data.asSharedFlow()
+
     init {
-        if(connection.isOnline()){
+        if (connection.isOnline()) {
             Log.d("MyLog", "111")
             loadNetworkList()
         }
         loadData()
     }
+
     fun changeEnableState(todoItem: TodoItem) {
         viewModelScope.launch {
             val newItem = todoItem.copy(done = !todoItem.done)
@@ -63,6 +70,7 @@ class MainViewModel @Inject constructor(private val repository: TodoListReposito
         job?.cancel()
         loadData()
     }
+
     private fun loadNetworkList() {
         viewModelScope.launch(Dispatchers.IO) {
             repository.getNetworkData()
@@ -77,7 +85,7 @@ class MainViewModel @Inject constructor(private val repository: TodoListReposito
 
     private fun updateNetworkItem(todoItem: TodoItem) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.updateNetworkItem(sharedPreferencesHelper.getLastRevision(), todoItem )
+            repository.updateNetworkItem(sharedPreferencesHelper.getLastRevision(), todoItem)
         }
     }
 
@@ -101,4 +109,4 @@ class MainViewModel @Inject constructor(private val repository: TodoListReposito
         super.onCleared()
         job?.cancel()
     }
-    }
+}

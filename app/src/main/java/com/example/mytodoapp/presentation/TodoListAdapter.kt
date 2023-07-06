@@ -8,7 +8,6 @@ import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mytodoapp.R
@@ -20,7 +19,8 @@ import com.example.mytodoapp.domain.TodoItem
  * It provides the necessary functionality to bind TodoItem data to the views in the list.
  */
 
-class TodoListAdapter : ListAdapter<TodoItem, TodoListAdapter.TodoListViewHolder>(TodoItemDiffCallback())  {
+class TodoListAdapter :
+    ListAdapter<TodoItem, TodoListAdapter.TodoListViewHolder>(TodoItemDiffCallback()) {
 
 
     var onTodoItemClickListener: OnTodoItemClickListener? = null
@@ -79,7 +79,6 @@ class TodoListAdapter : ListAdapter<TodoItem, TodoListAdapter.TodoListViewHolder
             onCheckboxItemClickListener?.onCheckboxItemClick(todoItem)
         }
     }
-
 
 
     class TodoListViewHolder(todoItemView: View) : RecyclerView.ViewHolder(todoItemView) {

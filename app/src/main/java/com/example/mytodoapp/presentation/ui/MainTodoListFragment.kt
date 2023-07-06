@@ -4,45 +4,36 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.recyclerview.widget.RecyclerView
 import com.example.mytodoapp.App
 import com.example.mytodoapp.R
-import com.example.mytodoapp.appComponent
-import com.example.mytodoapp.di.AppComponent
+import com.example.mytodoapp.databinding.FragmentMainTodoListBinding
 import com.example.mytodoapp.domain.TodoItem
-import com.example.mytodoapp.presentation.viewmodels.MainViewModel
 import com.example.mytodoapp.presentation.TodoListAdapter
-
 import com.example.mytodoapp.presentation.ui.AddEditTodoItemFragment.Companion.MODE_ADD
+import com.example.mytodoapp.presentation.viewmodels.MainViewModel
 import com.example.mytodoapp.presentation.viewmodels.ViewModelFactory
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.imageview.ShapeableImageView
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * This class represents the MainTodoListFragment, which is responsible for displaying the main todo list.
- * It extends the Fragment class and provides the UI for viewing and interacting with the todo items.
- * The fragment initializes the views, sets up the RecyclerView, and interacts with the MainViewModel to load and update data.
+ * This class represents a fragment that displays the main todo list in an Android application.
+ * It handles the user interface elements and logic for viewing, editing, and managing todo items.
+ * The class follows the single responsibility principle by focusing on the specific task of managing
+ * the main todo list.
  */
 
-class MainTodoListFragment() : Fragment(){
-    private lateinit var todoListRecyclerView: RecyclerView
+class MainTodoListFragment() : Fragment() {
+
+    private lateinit var binding: FragmentMainTodoListBinding
     private lateinit var todoListAdapter: TodoListAdapter
-    private lateinit var numberOfDoneTodo: TextView
-    private lateinit var buttonAddTodoItem: FloatingActionButton
+
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
-lateinit var viewModel:MainViewModel
+    lateinit var viewModel: MainViewModel
     private val component by lazy {
         (activity?.application as App).appComponent
     }
@@ -50,63 +41,44 @@ lateinit var viewModel:MainViewModel
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_main_todo_list, container, false)
-
+    ): View {
+        binding = FragmentMainTodoListBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         component.injectMainViewModel(this)
-
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity(), viewModelFactory)[MainViewModel::class.java]
-        initViews(view)
+        viewModel =
+            ViewModelProvider(requireActivity(), viewModelFactory)[MainViewModel::class.java]
         setupRecyclerView()
-        viewModel.loadData()
+        initViews()
+    }
 
-        buttonAddTodoItem.setOnClickListener {
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.root_container, AddEditTodoItemFragment.newInstance(MODE_ADD))
-                .addToBackStack(null).commit()
+    private fun initViews() = with(binding) {
+        changeVisibility.tag = true
+        changeVisibility.setOnClickListener {
+            viewModel.changeMode()
+            when (viewModel.modeAll) {
+                true -> changeVisibility.setImageResource(R.drawable.ic_visible)
+                false -> changeVisibility.setImageResource(R.drawable.ic_invisible)
+            }
         }
-
-        viewModel.countItemsWithTrueDone().observe(viewLifecycleOwner) {count ->
+        binding.buttonAddTodoItem.setOnClickListener {
+            openAddEditTodoItemFragment()
+        }
+        viewModel.countItemsWithTrueDone().observe(viewLifecycleOwner) { count ->
             val todoDoneItem = getString(R.string.number_of_done_todo) + count
-                numberOfDoneTodo.text = todoDoneItem
+            binding.numberOfDoneTodo.text = todoDoneItem
         }
-
         lifecycleScope.launch {
             viewModel.data.collectLatest {
                 updateUI(it)
             }
         }
-
     }
 
-    private fun initViews(view: View) {
-        numberOfDoneTodo = view.findViewById(R.id.numberOfDoneTodo)
-
-        buttonAddTodoItem =
-            view.findViewById(R.id.button_add_todo_item)
-
-        val changeVisibility: ShapeableImageView =
-            view.findViewById(R.id.change_visibility)
-        changeVisibility.tag = true
-        changeVisibility.setOnClickListener {
-                viewModel.changeMode()
-                when (viewModel.modeAll) {
-                    true -> {
-                        changeVisibility.setImageResource(R.drawable.ic_visible)
-                    }
-                    false -> {
-                        changeVisibility.setImageResource(R.drawable.ic_invisible)
-                    }
-                }
-        }
-    }
-
-    private fun setupRecyclerView() {
-        todoListRecyclerView = requireActivity().findViewById(R.id.todoListRcView)
+    private fun setupRecyclerView() = with(binding) {
         todoListAdapter = TodoListAdapter()
         todoListRecyclerView.adapter = todoListAdapter
         setupClickListener()
@@ -117,7 +89,7 @@ lateinit var viewModel:MainViewModel
         todoListAdapter.onTodoItemClickListener = object : TodoListAdapter.OnTodoItemClickListener {
             override fun onTodoItemClick(todoItem: TodoItem) {
                 requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.root_container, AddEditTodoItemFragment.newInstance(todoItem.id))
+                    .replace(R.id.rootContainer, AddEditTodoItemFragment.newInstance(todoItem.id))
                     .addToBackStack(null)
                     .commit()
             }
@@ -134,11 +106,17 @@ lateinit var viewModel:MainViewModel
     }
 
     private fun updateUI(list: List<TodoItem>) {
-        if(viewModel.modeAll) {
+        if (viewModel.modeAll) {
             todoListAdapter.submitList(list.sortedBy { it.creationDate })
-        }else{
+        } else {
             todoListAdapter.submitList(list.filter { !it.done }.sortedBy { it.creationDate })
         }
+    }
+
+    private fun openAddEditTodoItemFragment(){
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.rootContainer, AddEditTodoItemFragment.newInstance(MODE_ADD))
+            .addToBackStack(null).commit()
     }
 
     companion object {
