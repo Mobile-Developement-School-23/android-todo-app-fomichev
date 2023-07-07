@@ -65,7 +65,6 @@ class AddEditTodoItemFragment : Fragment() {
         binding = FragmentAddEditTodoItemBinding.inflate(inflater, container, false)
         return binding.root
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel =
@@ -102,15 +101,10 @@ class AddEditTodoItemFragment : Fragment() {
             else if (spinnerPriority.selectedItemId.toInt() == 2) Importance.HIGH
             else Importance.NORMAL
         val currentDate = Date(System.currentTimeMillis())
+
         if (editTextDescription.text?.isNotEmpty() == true) {
-            viewModel.editTodoItem(
-                "${editTextDescription.text}",
-                itemPriority,
-                itemDone,
-                currentDate,
-                currentDate,
-                deadlineItem,
-                todoItemId
+            viewModel.editTodoItem("${editTextDescription.text}", itemPriority,
+                itemDone, currentDate, currentDate, deadlineItem, todoItemId
             )
             openMainTodoListFragment()
         } else Toast.makeText(
@@ -123,13 +117,9 @@ class AddEditTodoItemFragment : Fragment() {
     private fun initEditTodoItem() = with(binding) {
         viewModel.todoItem.observe(viewLifecycleOwner) {
             editTextDescription.setText(it.description)
-            when (it.priority) {
-                Importance.HIGH -> spinnerPriority.setSelection(2)
-                Importance.LOW -> spinnerPriority.setSelection(1)
-                else -> spinnerPriority.setSelection(0)
-            }
+            setPrioritySpinnerSelection(it.priority)
             if (it.deadline != NO_DEADLINE) {
-                binding.tvCalendar.text = it.deadline.toString()
+                tvCalendar.text = it.deadline.toString()
                 tvCalendar.visibility = View.VISIBLE
                 switchCalendar.isChecked = true
                 deadlineItem = it.deadline
@@ -141,6 +131,15 @@ class AddEditTodoItemFragment : Fragment() {
             creationDate = it.creationDate.toString()
             initSwitchCalendar()
         }
+    }
+
+    private fun setPrioritySpinnerSelection(priority: Importance) {
+        val prioritySelection = when (priority) {
+            Importance.HIGH -> 2
+            Importance.LOW -> 1
+            else -> 0
+        }
+        binding.spinnerPriority.setSelection(prioritySelection)
     }
 
     private fun launchAddMode() = with(binding) {
@@ -159,14 +158,8 @@ class AddEditTodoItemFragment : Fragment() {
         val currentDate = Date(System.currentTimeMillis())
         val id = randomUUID().toString()
         if (editTextDescription.text?.isNotEmpty() == true) {
-            viewModel.addTodoItem(
-                "${editTextDescription.text}",
-                itemPriority,
-                false,
-                currentDate,
-                currentDate,
-                deadlineItem,
-                id
+            viewModel.addTodoItem("${editTextDescription.text}", itemPriority,
+                false, currentDate, currentDate, deadlineItem, id
             )
             openMainTodoListFragment()
         } else Toast.makeText(
@@ -222,9 +215,7 @@ class AddEditTodoItemFragment : Fragment() {
         @JvmStatic
         fun newInstance(param1: String?) = AddEditTodoItemFragment().apply {
             arguments = Bundle().apply {
-                if (param1 != null) {
-                    putString(ARG_PARAM1, param1)
-                }
+                if (param1 != null) { putString(ARG_PARAM1, param1) }
             }
         }
     }

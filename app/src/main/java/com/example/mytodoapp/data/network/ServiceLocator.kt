@@ -21,8 +21,6 @@ object ServiceLocator {
         val instance = instances[kClass]
         if (instance != null) {
             return instance as T
-        } else {
-            throw IllegalStateException("No instance registered for class ${kClass.simpleName}")
-        }
+        } else throw IllegalStateException("No instance registered for class ${kClass.simpleName}")
     }
 }

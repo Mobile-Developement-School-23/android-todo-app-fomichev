@@ -28,13 +28,10 @@ class TodoItemResponseMapper @Inject constructor(){
             dateCreation = toDoItem.creationDate.time,
             dateChanged = when (toDoItem.changeDate) {
                 null -> toDoItem.creationDate.time
-                else -> {
-                    toDoItem.changeDate!!.time
-                }
+                else -> toDoItem.changeDate!!.time
             },
             updated_by = Token.updated_by
         )
     }
-
 }
 

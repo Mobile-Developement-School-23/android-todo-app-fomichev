@@ -57,15 +57,8 @@ class TodoItemViewModel @Inject constructor(
         }
     }
 
-    fun addTodoItem(
-        inputDescription: String?,
-        priority: Importance,
-        done: Boolean,
-        creatingDate: Date,
-        changeDate: Date?,
-        deadline: Date?,
-        id: String
-    ) {
+    fun addTodoItem(inputDescription: String?, priority: Importance, done: Boolean,
+        creatingDate: Date, changeDate: Date?, deadline: Date?, id: String) {
         val description = parseName(inputDescription)
         val fieldsValid = validateInput(description)
         if (fieldsValid) {
@@ -87,15 +80,8 @@ class TodoItemViewModel @Inject constructor(
         }
     }
 
-    fun editTodoItem(
-        inputDescription: String?,
-        priority: Importance,
-        done: Boolean,
-        creatingDate: Date,
-        changeDate: Date?,
-        deadline: Date?,
-        id: String
-    ) {
+    fun editTodoItem(inputDescription: String?, priority: Importance, done: Boolean,
+        creatingDate: Date, changeDate: Date?, deadline: Date?, id: String) {
         val description = parseName(inputDescription)
         val fieldsValid = validateInput(description)
         if (fieldsValid) {
@@ -107,8 +93,7 @@ class TodoItemViewModel @Inject constructor(
                         done = done,
                         changeDate = changeDate,
                         deadline = deadline,
-                        id = id
-                    )
+                        id = id)
                     editTodoItemUseCase.editTodoItem(item)
                     if (connection.isOnline()) updateNetworkItem(item)
                     else sharedPreferencesHelper.isNotOnline = true }

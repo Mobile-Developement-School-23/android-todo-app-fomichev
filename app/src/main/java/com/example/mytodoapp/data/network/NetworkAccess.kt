@@ -18,7 +18,5 @@ fun <T> Response<T>.parseResponse(): NetworkAccess<T> {
     return if (this.isSuccessful && this.body() != null) {
         val responseBody = this.body()
         NetworkAccess.Success(responseBody!!)
-    } else {
-        NetworkAccess.Error(this)
-    }
+    } else NetworkAccess.Error(this)
 }

@@ -46,10 +46,7 @@ class ViewModelFactory @Inject constructor(
                     deleteShopItemUseCase
                 )
             }
-
-            else -> {
-                throw IllegalStateException("Unknown ViewModel")
-            }
+            else -> throw IllegalStateException("Unknown ViewModel")
         }
         return viewModel as T
     }

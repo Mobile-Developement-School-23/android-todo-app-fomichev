@@ -22,15 +22,11 @@ class DatePickerHelper(private val activity: AppCompatActivity) {
     private val dateFormat = "dd-MMMM-yyyy"
     private val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.getDefault())
 
-    fun setData(
-        tvCalendar: TextView,
-        datePicker: Calendar,
-        isCalendarVisible: Boolean,
-        onDateSet: (java.sql.Date) -> Unit
-    ) {
+    fun setData(tvCalendar: TextView, datePicker: Calendar, isCalendarVisible: Boolean,
+        onDateSet: (java.sql.Date) -> Unit) {
         val dateListener =
-            DatePickerDialog.OnDateSetListener { _: DatePicker?, year: Int, month: Int, dayOfMonth: Int ->
-                datePicker[Calendar.YEAR] = year
+            DatePickerDialog.OnDateSetListener { _: DatePicker?, year: Int, month: Int, dayOfMonth:
+            Int -> datePicker[Calendar.YEAR] = year
                 datePicker[Calendar.MONTH] = month
                 datePicker[Calendar.DAY_OF_MONTH] = dayOfMonth
                 val selectedDate = datePicker.time
@@ -38,19 +34,12 @@ class DatePickerHelper(private val activity: AppCompatActivity) {
                 val sqlDate = java.sql.Date(selectedDate.time)
                 onDateSet(sqlDate)
             }
-
         if (isCalendarVisible) {
             val initialYear = datePicker[Calendar.YEAR]
             val initialMonth = datePicker[Calendar.MONTH]
             val initialDay = datePicker[Calendar.DAY_OF_MONTH]
-            DatePickerDialog(
-                activity,
-                R.style.MyDatePickerDialog,
-                dateListener,
-                initialYear,
-                initialMonth,
-                initialDay
-            ).show()
+            DatePickerDialog(activity, R.style.MyDatePickerDialog, dateListener, initialYear,
+                initialMonth, initialDay).show()
         }
     }
 }

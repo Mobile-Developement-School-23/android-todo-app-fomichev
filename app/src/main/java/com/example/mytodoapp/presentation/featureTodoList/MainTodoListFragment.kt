@@ -63,10 +63,7 @@ class MainTodoListFragment() : Fragment() {
         changeVisibility.tag = true
         changeVisibility.setOnClickListener {
             viewModel.changeMode()
-            when (viewModel.modeAll) {
-                true -> changeVisibility.setImageResource(R.drawable.ic_visible)
-                false -> changeVisibility.setImageResource(R.drawable.ic_invisible)
-            }
+            updateChangeVisibilityIcon()
         }
         binding.buttonAddTodoItem.setOnClickListener {
             openAddEditTodoItemFragment()
@@ -80,6 +77,13 @@ class MainTodoListFragment() : Fragment() {
                 updateUI(it)
             }
         }
+    }
+
+    private fun updateChangeVisibilityIcon() {
+        val visibilityIconRes = if (viewModel.modeAll) R.drawable.ic_visible
+         else R.drawable.ic_invisible
+
+        binding.changeVisibility.setImageResource(visibilityIconRes)
     }
 
     private fun setupRecyclerView() = with(binding) {

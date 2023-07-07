@@ -18,13 +18,16 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 /**
- * The TodoListRepositoryImpl class is responsible for managing the interactions between the local database,
- * the SharedPreferencesHelper, and the remote server API for TodoList items. It implements the TodoItemsRepository
- * interface and provides methods for adding, deleting, editing, and retrieving TodoItems from the database.
+ * The TodoListRepositoryImpl class is responsible for managing the interactions
+ * between the local database,
+ * the SharedPreferencesHelper, and the remote server API for TodoList items.
+ * It implements the TodoItemsRepository
+ * interface and provides methods for adding, deleting, editing, and retrieving
+ * TodoItems from the database.
  * The class ensures synchronization between the local and remote data sources.
  */
 class TodoListRepositoryImpl @Inject constructor(
-    private val todoLocaldatabase: TodoLocalDbImpl,
+    private val todoLocalDbImpl: TodoLocalDbImpl,
     private val sharedPreferencesHelper: SharedPreferencesHelper,
     private val todoItemResponseMapper: TodoItemResponseMapper
 ) : TodoItemsRepository {
@@ -35,26 +38,27 @@ class TodoListRepositoryImpl @Inject constructor(
 
     override suspend fun addTodoItem(todoItem: TodoItem) {
         Log.d("MyLog", "addTodoItem in TodoListRepositoryImpl")
-        todoLocaldatabase.addTodoItem(todoItem)
+        todoLocalDbImpl.addTodoItem(todoItem)
     }
 
     override suspend fun deleteTodoItem(todoItem: TodoItem) {
         Log.d("MyLog", "(deleteTodoItem in TodoListRepositoryImpl)")
 
-        todoLocaldatabase.deleteTodoItem(todoItem)
+        todoLocalDbImpl.deleteTodoItem(todoItem)
     }
 
     override suspend fun editTodoItem(todoItem: TodoItem) {
         Log.d("MyLog", "editTodoItem in TodoListRepositoryImpl")
-        todoLocaldatabase.editTodoItem(todoItem)
+        todoLocalDbImpl.editTodoItem(todoItem)
     }
 
     override suspend fun getTodoItem(todoItemId: String): TodoItem {
         Log.d("MyLog", "getTodoItem in TodoListRepositoryImpl")
-        return todoLocaldatabase.getTodoItem(todoItemId)
+        return todoLocalDbImpl.getTodoItem(todoItemId)
     }
 
-    fun getAllData(): Flow<List<TodoItem>> = todoLocaldatabase.getAllData().map { list -> list.map { it.toItem() } }
+    fun getAllData(): Flow<List<TodoItem>> = todoLocalDbImpl.getAllData()
+        .map { list -> list.map { it.toItem() } }
 
 
 
@@ -63,17 +67,13 @@ class TodoListRepositoryImpl @Inject constructor(
         lastRevision: Int,
         newItem: TodoItem
     ): NetworkAccess<PostItemApiResponse> {
-        Log.d("MyLog", "postNetworkItem in TodoListRepositoryImpl")
         val postResponse = service.postElement(
             lastRevision,
             PostItemApiRequest(todoItemResponseMapper.mapToTodoItemResponse(newItem))
         )
-
         if (postResponse.isSuccessful) {
             val responseBody = postResponse.body()
-            if (responseBody != null) {
-                return NetworkAccess.Success(responseBody)
-            }
+            if (responseBody != null) return NetworkAccess.Success(responseBody)
         }
         return NetworkAccess.Error(postResponse)
     }
@@ -82,16 +82,11 @@ class TodoListRepositoryImpl @Inject constructor(
         lastRevision: Int,
         id: String
     ): NetworkAccess<PostItemApiResponse> {
-
-            Log.d("MyLog", "deleteNetworkItem in TodoListRepositoryImpl")
             val postResponse = service.deleteElement(id, lastRevision)
 
             if (postResponse.isSuccessful) {
                 val responseBody = postResponse.body()
-                if (responseBody != null) {
-                    return NetworkAccess.Success(responseBody)
-
-                }
+                if (responseBody != null) return NetworkAccess.Success(responseBody)
             }
             return NetworkAccess.Error(postResponse)
         }
@@ -101,7 +96,6 @@ class TodoListRepositoryImpl @Inject constructor(
         lastRevision: Int,
         item: TodoItem
     ) = withContext(Dispatchers.IO) {
-        Log.d("MyLog", "updateNetworkItem in TodoListRepositoryImpl")
         val updateItemResponse = service.updateElement(
             item.id, lastRevision, PostItemApiRequest(
                 todoItemResponseMapper.mapToTodoItemResponse(item)
@@ -109,42 +103,28 @@ class TodoListRepositoryImpl @Inject constructor(
         )
         if (updateItemResponse.isSuccessful) {
             val body = updateItemResponse.body()
-            if (body != null) {
-                sharedPreferencesHelper.putRevision(body.revision)
-            }
+            if (body != null) sharedPreferencesHelper.putRevision(body.revision)
         }
     }
 
     suspend fun getNetworkData() {
-
         val networkListResponse = service.getList()
         if (networkListResponse.isSuccessful) {
-            Log.d("MyLog", "getNetworkData in TodoListRepositoryImpl")
             val body = networkListResponse.body()
             if (body != null) {
                 val networkList = body.list
-                val currentList = todoLocaldatabase.getAll()
+                val currentList = todoLocalDbImpl.getAll()
                     .map { todoItemResponseMapper.mapToTodoItemResponse(it.toItem()) }
                 val mergedList = HashMap<String, TodoItemResponse>()
-
-                for (item in networkList) {
-                    mergedList[item.id] = item
-                }
+                for (item in networkList) mergedList[item.id] = item
                 for (item in currentList) {
-
                     if (mergedList.containsKey(item.id)) {
                         val item1 = mergedList[item.id]
-                        if (item.dateChanged > item1!!.dateChanged) {
-                            mergedList[item.id] = item
-                        } else {
-                            mergedList[item.id] = item1
-                        }
-                    } else {
-                        mergedList[item.id] = item
-                    }
+                        if (item.dateChanged > item1!!.dateChanged) mergedList[item.id] = item
+                         else mergedList[item.id] = item1
+                    } else mergedList[item.id] = item
                 }
                 updateNetworkList(mergedList.values.toList())
-
             }
         }
     }
@@ -152,13 +132,10 @@ class TodoListRepositoryImpl @Inject constructor(
     override suspend fun syncListOfTodo() = getNetworkData()
     private suspend fun updateNetworkList(mergedList: List<TodoItemResponse>) {
 
-            Log.d("MyLog", "updateNetworkList in TodoListRepositoryImpl")
             val updateResponse = service.updateList(
                 sharedPreferencesHelper.getLastRevision(),
                 PatchListApiRequest(mergedList)
             )
-
-
             if (updateResponse.isSuccessful) {
                 val responseBody = updateResponse.body()
                 if (responseBody != null) {
@@ -172,7 +149,7 @@ class TodoListRepositoryImpl @Inject constructor(
     private suspend fun updateRoom(response: List<TodoItemResponse>) {
         Log.d("MyLog", "updateRoom in TodoListRepositoryImpl")
         val list = response.map { it.toItem() }
-        todoLocaldatabase.addList(list)
+        todoLocalDbImpl.addList(list)
     }
 }
 
