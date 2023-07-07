@@ -42,7 +42,7 @@
 
 
             <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/change_visibility"
+                android:id="@+id/changeVisibility"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"
@@ -80,7 +80,7 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/todoListRcView"
+            android:id="@+id/todoListRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="8dp"
@@ -93,7 +93,7 @@
     </androidx.cardview.widget.CardView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/button_add_todo_item"
+        android:id="@+id/buttonAddTodoItem"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_gravity="bottom|end"

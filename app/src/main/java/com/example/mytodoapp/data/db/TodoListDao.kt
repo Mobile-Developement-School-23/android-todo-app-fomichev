@@ -6,6 +6,10 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
+
+/**
+ * Data Access Object (DAO) interface for performing CRUD operations on the TodoItemDbModel table.
+ */
 @Dao
 interface TodoListDao {
 

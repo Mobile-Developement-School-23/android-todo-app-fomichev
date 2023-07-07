@@ -7,6 +7,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
+/**
+The RetrofitClient object is responsible for providing a singleton instance of Retrofit
+with a pre-configured OkHttpClient and GsonConverterFactory for making network requests
+to the API with the specified base URL. */
 object RetrofitClient {
     private var retrofitClient: Retrofit? = null
 

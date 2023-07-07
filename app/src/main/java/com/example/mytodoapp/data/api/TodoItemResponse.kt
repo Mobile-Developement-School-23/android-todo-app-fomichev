@@ -1,10 +1,17 @@
 package com.example.mytodoapp.data.api
 
-import com.example.mytodoapp.data.network.BaseUrl
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
 import com.google.gson.annotations.SerializedName
 import java.sql.Date
+
+/**
+ * Represents the response data for a Todo item from the API.
+ *
+ * This data class contains properties that represent various attributes of a Todo item.
+ * It is used to deserialize the JSON response received from the API into Kotlin objects.
+ * and provides conversion function to convert between TodoItemResponse and TodoItem objects.
+ */
 
 data class TodoItemResponse(
     @SerializedName("id")
@@ -42,27 +49,4 @@ data class TodoItemResponse(
         id
     )
 
-    companion object {
-        fun fromItem(toDoItem: TodoItem): TodoItemResponse {
-            return TodoItemResponse(
-                id = toDoItem.id,
-                text = toDoItem.description,
-                importance = when (toDoItem.priority) {
-                    Importance.LOW -> "low"
-                    Importance.NORMAL -> "basic"
-                    Importance.HIGH -> "important"
-                },
-                deadline = toDoItem.deadline?.time,
-                done = toDoItem.done,
-                dateCreation = toDoItem.creationDate.time,
-                dateChanged = when (toDoItem.changeDate) {
-                    null -> toDoItem.creationDate.time
-                    else -> {
-                        toDoItem.changeDate!!.time
-                    }
-                },
-                updated_by = BaseUrl.updated_by
-            )
-        }
-    }
 }

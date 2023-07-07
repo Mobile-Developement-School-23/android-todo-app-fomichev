@@ -1,8 +1,15 @@
-package com.example.mytodoapp.data.db
+package com.example.mytodoapp.data.mappers
 
+import com.example.mytodoapp.data.db.TodoItemDbModel
 import com.example.mytodoapp.domain.TodoItem
+import javax.inject.Inject
 
-class TodoListMapper {
+
+class TodoListMapper @Inject constructor() {
+
+    /**
+     * Mapper from domain entity to local Database
+     */
 
     fun mapEntityToDbModel(todoItem: TodoItem) = TodoItemDbModel(
         id = todoItem.id,
@@ -13,6 +20,10 @@ class TodoListMapper {
         changedAt = todoItem.changeDate?.time,
         deadline = todoItem.deadline?.time
     )
+
+    /**
+     * Mapper from local Database to domain entity
+     */
 
     fun mapDbModelToEntity(todoItemDbModel: TodoItemDbModel) = TodoItem(
         id = todoItemDbModel.id,
