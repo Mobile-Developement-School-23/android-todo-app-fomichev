@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:padding="6dp"
     android:orientation="vertical"
-    tools:context=".presentation.ui.AddEditTodoItemFragment">
+    tools:context=".presentation.featureAddEditTodoItem.AddEditTodoItemFragment">
 
 
 

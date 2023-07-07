@@ -1,5 +1,6 @@
-package com.example.mytodoapp.presentation.ui
+package com.example.mytodoapp.presentation.featureAddEditTodoItem
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,15 +10,14 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.mytodoapp.App
 import com.example.mytodoapp.R
+import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.databinding.FragmentAddEditTodoItemBinding
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.domain.TodoItem.Companion.NO_DEADLINE
-import com.example.mytodoapp.presentation.DatePickerHelper
-import com.example.mytodoapp.presentation.viewmodels.TodoItemViewModel
-import com.example.mytodoapp.presentation.viewmodels.ViewModelFactory
+import com.example.mytodoapp.presentation.featureTodoList.MainTodoListFragment
+import com.example.mytodoapp.presentation.factory.ViewModelFactory
 import java.sql.Date
 import java.util.Calendar
 import java.util.UUID.randomUUID
@@ -34,11 +34,8 @@ class AddEditTodoItemFragment : Fragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
-
     lateinit var viewModel: TodoItemViewModel
-    private val component by lazy {
-        (activity?.application as App).appComponent
-    }
+
     private val datePickerHelper by lazy {
         DatePickerHelper(requireActivity() as AppCompatActivity)
     }
@@ -47,13 +44,20 @@ class AddEditTodoItemFragment : Fragment() {
     private var creationDate = NO_CREATION_DATE
     private var itemDone = false
     private var todoItemId: String = TodoItem.UNDEFINED_ID
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        context.appComponent
+            .addEditTodoItemComponent()
+            .create()
+            .inject(this)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             todoItemId = it.getString(ARG_PARAM1)!!
         }
     }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -63,7 +67,6 @@ class AddEditTodoItemFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        component.injectTodoAddFragmentViewModel(this)
         super.onViewCreated(view, savedInstanceState)
         viewModel =
             ViewModelProvider(requireActivity(), viewModelFactory)[TodoItemViewModel::class.java]

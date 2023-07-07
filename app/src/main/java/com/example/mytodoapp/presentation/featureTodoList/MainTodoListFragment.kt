@@ -1,5 +1,6 @@
-package com.example.mytodoapp.presentation.ui
+package com.example.mytodoapp.presentation.featureTodoList
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,14 +8,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.example.mytodoapp.App
 import com.example.mytodoapp.R
+import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.databinding.FragmentMainTodoListBinding
 import com.example.mytodoapp.domain.TodoItem
-import com.example.mytodoapp.presentation.TodoListAdapter
-import com.example.mytodoapp.presentation.ui.AddEditTodoItemFragment.Companion.MODE_ADD
-import com.example.mytodoapp.presentation.viewmodels.MainViewModel
-import com.example.mytodoapp.presentation.viewmodels.ViewModelFactory
+import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment
+import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment.Companion.MODE_ADD
+import com.example.mytodoapp.presentation.factory.ViewModelFactory
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,10 +34,15 @@ class MainTodoListFragment() : Fragment() {
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
     lateinit var viewModel: MainViewModel
-    private val component by lazy {
-        (activity?.application as App).appComponent
-    }
 
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        context.appComponent
+            .mainTodoListComponent()
+            .create()
+            .inject(this)
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -47,7 +52,6 @@ class MainTodoListFragment() : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        component.injectMainViewModel(this)
         super.onViewCreated(view, savedInstanceState)
         viewModel =
             ViewModelProvider(requireActivity(), viewModelFactory)[MainViewModel::class.java]

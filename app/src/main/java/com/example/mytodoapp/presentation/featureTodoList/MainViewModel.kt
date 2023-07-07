@@ -1,4 +1,4 @@
-package com.example.mytodoapp.presentation.viewmodels
+package com.example.mytodoapp.presentation.featureTodoList
 
 import android.util.Log
 import androidx.lifecycle.LiveData

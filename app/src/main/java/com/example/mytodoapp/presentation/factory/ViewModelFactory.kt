@@ -1,15 +1,16 @@
-package com.example.mytodoapp.presentation.viewmodels
+package com.example.mytodoapp.presentation.factory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.mytodoapp.data.SharedPreferencesHelper
 import com.example.mytodoapp.data.TodoListRepositoryImpl
 import com.example.mytodoapp.data.network.CheckConnection
-import com.example.mytodoapp.di.ApplicationScope
 import com.example.mytodoapp.domain.usecases.AddTodoItemUseCase
 import com.example.mytodoapp.domain.usecases.DeleteTodoItemUseCase
 import com.example.mytodoapp.domain.usecases.EditTodoItemUseCase
 import com.example.mytodoapp.domain.usecases.GetTodoItemUseCase
+import com.example.mytodoapp.presentation.featureAddEditTodoItem.TodoItemViewModel
+import com.example.mytodoapp.presentation.featureTodoList.MainViewModel
 import javax.inject.Inject
 
 /**

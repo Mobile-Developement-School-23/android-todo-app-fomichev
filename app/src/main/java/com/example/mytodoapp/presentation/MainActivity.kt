@@ -1,11 +1,12 @@
-package com.example.mytodoapp.presentation.ui
+package com.example.mytodoapp.presentation
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.mytodoapp.App
 import com.example.mytodoapp.R
 import com.example.mytodoapp.databinding.ActivityMainBinding
-import com.example.mytodoapp.presentation.viewmodels.ViewModelFactory
+import com.example.mytodoapp.presentation.factory.ViewModelFactory
+import com.example.mytodoapp.presentation.featureTodoList.MainTodoListFragment
 import javax.inject.Inject
 
 /**

@@ -1,9 +1,11 @@
 package com.example.mytodoapp.di
 
 import com.example.mytodoapp.App
-import com.example.mytodoapp.presentation.ui.AddEditTodoItemFragment
-import com.example.mytodoapp.presentation.ui.MainActivity
-import com.example.mytodoapp.presentation.ui.MainTodoListFragment
+import com.example.mytodoapp.presentation.featureTodoList.subcomponent.MainTodoListComponent
+import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment
+import com.example.mytodoapp.presentation.MainActivity
+import com.example.mytodoapp.presentation.featureAddEditTodoItem.subcomponent.AddEditTodoItemComponent
+import com.example.mytodoapp.presentation.featureTodoList.MainTodoListFragment
 import dagger.Component
 
 /**
@@ -24,5 +26,9 @@ interface AppComponent {
     fun injectMainActivity(activity: MainActivity)
     fun injectMainViewModel(fragment: MainTodoListFragment)
     fun injectTodoAddFragmentViewModel(fragment: AddEditTodoItemFragment)
+
+    fun mainTodoListComponent(): MainTodoListComponent.Factory
+
+   fun addEditTodoItemComponent(): AddEditTodoItemComponent.Factory
 
 }

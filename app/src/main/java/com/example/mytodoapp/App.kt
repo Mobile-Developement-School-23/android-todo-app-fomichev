@@ -34,7 +34,7 @@ class App() : Application() {
     lateinit var appComponent: AppComponent
 
     @Inject
-    lateinit var todoLocaldatabase: TodoLocalDbImpl
+    lateinit var todoLocalDbImpl: TodoLocalDbImpl
 
     @Inject
     lateinit var todoItemResponseMapper: TodoItemResponseMapper
@@ -61,7 +61,7 @@ class App() : Application() {
         ServiceLocator.register(AppDataBase.create(ServiceLocator.get(Context::class)))
         ServiceLocator.register(
             TodoListRepositoryImpl(
-                todoLocaldatabase,
+                todoLocalDbImpl,
                 sharedPreferencesHelper,
                 todoItemResponseMapper
             )

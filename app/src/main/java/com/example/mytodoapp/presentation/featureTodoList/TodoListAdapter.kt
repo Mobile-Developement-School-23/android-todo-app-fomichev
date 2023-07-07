@@ -1,4 +1,4 @@
-package com.example.mytodoapp.presentation
+package com.example.mytodoapp.presentation.featureTodoList
 
 import android.graphics.Paint
 import android.view.LayoutInflater
@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.mytodoapp.R
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
+import com.example.mytodoapp.presentation.utils.TodoItemDiffCallback
 
 /**
  * This class represents the adapter for a RecyclerView used to display a list of TodoItems.
