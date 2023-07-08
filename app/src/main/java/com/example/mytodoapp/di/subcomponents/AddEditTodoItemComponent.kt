@@ -1,4 +1,4 @@
-package com.example.mytodoapp.presentation.featureAddEditTodoItem.subcomponent
+package com.example.mytodoapp.di.subcomponents
 
 import com.example.mytodoapp.di.FragmentScope
 import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment

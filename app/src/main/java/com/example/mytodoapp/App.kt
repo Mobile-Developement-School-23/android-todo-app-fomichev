@@ -8,12 +8,8 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.mytodoapp.data.SharedPreferencesHelper
-import com.example.mytodoapp.data.TodoListRepositoryImpl
 import com.example.mytodoapp.data.mappers.TodoItemResponseMapper
-import com.example.mytodoapp.data.db.AppDataBase
 import com.example.mytodoapp.data.db.TodoLocalDbImpl
-import com.example.mytodoapp.data.network.CheckConnection
-import com.example.mytodoapp.data.network.ServiceLocator
 import com.example.mytodoapp.di.AppComponent
 import com.example.mytodoapp.di.ApplicationModule
 import com.example.mytodoapp.di.DaggerAppComponent
@@ -33,15 +29,6 @@ class App() : Application() {
 
     lateinit var appComponent: AppComponent
 
-    @Inject
-    lateinit var todoLocalDbImpl: TodoLocalDbImpl
-
-    @Inject
-    lateinit var todoItemResponseMapper: TodoItemResponseMapper
-
-    @Inject
-    lateinit var sharedPreferencesHelper: SharedPreferencesHelper
-
     override fun onCreate() {
         super.onCreate()
 
@@ -55,18 +42,6 @@ class App() : Application() {
             PeriodicWorkRequestBuilder<BackgroundWorkerClass>(8, TimeUnit.HOURS).setConstraints(
                 constraints
             ).build()
-
-        ServiceLocator.register<Context>(this)
-        ServiceLocator.register(SharedPreferencesHelper(applicationContext))
-        ServiceLocator.register(AppDataBase.create(ServiceLocator.get(Context::class)))
-        ServiceLocator.register(
-            TodoListRepositoryImpl(
-                todoLocalDbImpl,
-                sharedPreferencesHelper,
-                todoItemResponseMapper
-            )
-        )
-        ServiceLocator.register(CheckConnection(applicationContext))
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "Update",

@@ -1,7 +1,9 @@
-package com.example.mytodoapp.presentation.featureTodoList.subcomponent
+package com.example.mytodoapp.di.subcomponents
 
+import androidx.lifecycle.LifecycleOwner
 import com.example.mytodoapp.di.FragmentScope
 import com.example.mytodoapp.presentation.featureTodoList.MainTodoListFragment
+import dagger.Provides
 import dagger.Subcomponent
 
 /**
@@ -17,4 +19,5 @@ interface MainTodoListComponent {
     }
 
     fun inject(fragment: MainTodoListFragment)
+
 }

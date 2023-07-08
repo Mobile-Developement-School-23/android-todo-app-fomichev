@@ -1,10 +1,11 @@
 package com.example.mytodoapp.di
 
 import com.example.mytodoapp.App
-import com.example.mytodoapp.presentation.featureTodoList.subcomponent.MainTodoListComponent
+import com.example.mytodoapp.di.subcomponents.MainTodoListComponent
 import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment
 import com.example.mytodoapp.presentation.MainActivity
-import com.example.mytodoapp.presentation.featureAddEditTodoItem.subcomponent.AddEditTodoItemComponent
+import com.example.mytodoapp.di.subcomponents.AddEditTodoItemComponent
+import com.example.mytodoapp.presentation.factory.ViewModelFactory
 import com.example.mytodoapp.presentation.featureTodoList.MainTodoListFragment
 import dagger.Component
 
@@ -31,4 +32,5 @@ interface AppComponent {
 
    fun addEditTodoItemComponent(): AddEditTodoItemComponent.Factory
 
+    fun findViewModelFactory(): ViewModelFactory
 }

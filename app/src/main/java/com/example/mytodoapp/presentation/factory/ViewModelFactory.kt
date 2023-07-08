@@ -1,5 +1,6 @@
 package com.example.mytodoapp.presentation.factory
 
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.mytodoapp.data.SharedPreferencesHelper
@@ -26,7 +27,7 @@ class ViewModelFactory @Inject constructor(
     private val getTodoItemUseCase: GetTodoItemUseCase,
     private val addTodoItemUseCase: AddTodoItemUseCase,
     private val editTodoItemUseCase: EditTodoItemUseCase,
-    private val deleteShopItemUseCase: DeleteTodoItemUseCase
+    private val deleteShopItemUseCase: DeleteTodoItemUseCase,
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

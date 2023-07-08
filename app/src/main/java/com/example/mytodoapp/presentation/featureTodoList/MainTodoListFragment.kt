@@ -6,8 +6,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.whenStarted
 import com.example.mytodoapp.R
 import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.databinding.FragmentMainTodoListBinding
@@ -15,6 +20,7 @@ import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment
 import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment.Companion.MODE_ADD
 import com.example.mytodoapp.presentation.factory.ViewModelFactory
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -53,10 +59,15 @@ class MainTodoListFragment() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         viewModel =
-            ViewModelProvider(requireActivity(), viewModelFactory)[MainViewModel::class.java]
+            ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
+        viewModel.initLifecycleOwner(viewLifecycleOwner)
         setupRecyclerView()
         initViews()
+
+
+
     }
 
     private fun initViews() = with(binding) {
@@ -68,13 +79,18 @@ class MainTodoListFragment() : Fragment() {
         binding.buttonAddTodoItem.setOnClickListener {
             openAddEditTodoItemFragment()
         }
-        viewModel.countItemsWithTrueDone().observe(viewLifecycleOwner) { count ->
-            val todoDoneItem = getString(R.string.number_of_done_todo) + count
-            binding.numberOfDoneTodo.text = todoDoneItem
+        lifecycleScope.launch {
+            viewModel.countItemsWithTrueDone().collect {count ->
+                val todoDoneItem = getString(R.string.number_of_done_todo) + count
+                binding.numberOfDoneTodo.text = todoDoneItem
+
+            }
         }
         lifecycleScope.launch {
-            viewModel.data.collectLatest {
-                updateUI(it)
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.data.collectLatest {
+                    updateUI(it)
+                }
             }
         }
     }
