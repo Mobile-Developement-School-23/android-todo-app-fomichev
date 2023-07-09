@@ -89,7 +89,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun loadData() {
+    private fun loadData() {
         viewModelScope.launch(Dispatchers.IO) {
             _data.emitAll(repository.getAllData())
         }
