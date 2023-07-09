@@ -8,8 +8,8 @@ import dagger.Subcomponent
  * Represents a Dagger subcomponent for the add/edit todo item feature.
  * This subcomponent is responsible for providing dependencies to the AddEditTodoItemFragment.
  */
-@Subcomponent()
 @FragmentScope
+@Subcomponent
 interface AddEditTodoItemComponent {
     @Subcomponent.Factory
     interface Factory {
