@@ -1,6 +1,7 @@
-package com.example.mytodoapp.di
+package com.example.mytodoapp.di.modules
 
 import android.content.Context
+import com.example.mytodoapp.di.ApplicationScope
 import dagger.Module
 import dagger.Provides
 

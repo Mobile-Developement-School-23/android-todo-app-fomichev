@@ -1,9 +1,12 @@
 package com.example.mytodoapp.presentation.featureTodoList
 
 import android.util.Log
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.example.mytodoapp.data.SharedPreferencesHelper
 import com.example.mytodoapp.data.TodoListRepositoryImpl
@@ -14,13 +17,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 
 /**
  * This class represents the ViewModel for the main screen of the application. It provides data and logic
@@ -41,27 +49,31 @@ class MainViewModel @Inject constructor(
     private val editTodoItemUseCase: EditTodoItemUseCase
 ) : ViewModel() {
 
-
     var modeAll: Boolean = true
     private var job: Job? = null
 
-    private val _data = MutableSharedFlow<List<TodoItem>>()
-    val data: SharedFlow<List<TodoItem>> = _data.asSharedFlow()
+    private val _data = MutableStateFlow<List<TodoItem>>(emptyList())
+    val data: StateFlow<List<TodoItem>> = _data.asStateFlow()
+    private lateinit var lifecycleOwner: LifecycleOwner
 
     init {
         if (connection.isOnline()) {
-            Log.d("MyLog", "111")
             loadNetworkList()
         }
         loadData()
     }
+    fun initLifecycleOwner(owner: LifecycleOwner) {
+        lifecycleOwner = owner
+    }
 
     fun changeEnableState(todoItem: TodoItem) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val newItem = todoItem.copy(done = !todoItem.done)
-            editTodoItemUseCase.editTodoItem(newItem)
-            if (connection.isOnline()) updateNetworkItem(newItem)
-            else sharedPreferencesHelper.isNotOnline = true
+        lifecycleOwner.lifecycleScope.launch {
+            lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                val newItem = todoItem.copy(done = !todoItem.done)
+                editTodoItemUseCase.editTodoItem(newItem)
+                if (connection.isOnline()) updateNetworkItem(newItem)
+                else sharedPreferencesHelper.isNotOnline = true
+            }
         }
     }
 
@@ -77,8 +89,8 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun loadData() {
-        job = viewModelScope.launch(Dispatchers.IO) {
+    private fun loadData() {
+        viewModelScope.launch(Dispatchers.IO) {
             _data.emitAll(repository.getAllData())
         }
     }
@@ -89,18 +101,11 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun countItemsWithTrueDone(): LiveData<Int> {
+    fun countItemsWithTrueDone(): Flow<Int> {
         val todoList: Flow<List<TodoItem>> = repository.getAllData()
-        val countDoneItems = MutableLiveData<Int>()
-        val doneItemsCount = todoList.map { list ->
+        return todoList.map { list ->
             list.count { it.done }
         }
-        viewModelScope.launch(Dispatchers.IO) {
-            doneItemsCount.collect { count ->
-                withContext(Dispatchers.Main) { countDoneItems.value = count }
-            }
-        }
-        return countDoneItems
     }
 
     override fun onCleared() {
