@@ -24,7 +24,7 @@ class AddEditTodoItemFragment : Fragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
-    lateinit var viewModel: TodoItemViewModel
+    private lateinit var viewModel: TodoItemViewModel
 
 
     private var todoItemId: String = TodoItem.UNDEFINED_ID

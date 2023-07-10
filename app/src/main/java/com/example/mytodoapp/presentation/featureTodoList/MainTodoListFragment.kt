@@ -25,7 +25,7 @@ class MainTodoListFragment() : Fragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
-    lateinit var viewModel: MainViewModel
+    private lateinit var viewModel: MainViewModel
     private var fragmentViewComponent: MainTodoListFragmentViewController? = null
 
     override fun onAttach(context: Context) {
