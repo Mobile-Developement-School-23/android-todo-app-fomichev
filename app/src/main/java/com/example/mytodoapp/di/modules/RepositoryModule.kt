@@ -1,6 +1,7 @@
-package com.example.mytodoapp.di
+package com.example.mytodoapp.di.modules
 
 import com.example.mytodoapp.data.TodoListRepositoryImpl
+import com.example.mytodoapp.di.ApplicationScope
 import com.example.mytodoapp.domain.TodoItemsRepository
 import dagger.Binds
 import dagger.Module

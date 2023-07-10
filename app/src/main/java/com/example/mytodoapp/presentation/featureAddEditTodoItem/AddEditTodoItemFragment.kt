@@ -63,18 +63,13 @@ class AddEditTodoItemFragment : Fragment() {
             viewModel,
             todoItemId
         ).apply {
-            initSpinnerPriority()
-            when (todoItemId) {
-                MODE_ADD -> launchAddMode()
-                else -> launchEditMode()
-            }
+            chooseLaunchMode(todoItemId)
         }
     }
 
     companion object {
 
         private const val ARG_PARAM1 = "param1"
-        const val MODE_ADD = "-1"
 
         @JvmStatic
         fun newInstance(param1: String?) = AddEditTodoItemFragment().apply {

@@ -7,15 +7,11 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.example.mytodoapp.data.SharedPreferencesHelper
-import com.example.mytodoapp.data.mappers.TodoItemResponseMapper
-import com.example.mytodoapp.data.db.TodoLocalDbImpl
 import com.example.mytodoapp.di.AppComponent
-import com.example.mytodoapp.di.ApplicationModule
+import com.example.mytodoapp.di.modules.ApplicationModule
 import com.example.mytodoapp.di.DaggerAppComponent
 import com.example.mytodoapp.data.BackgroundWorkerClass
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
 /**
  * This class represents the main Application class of the Android application.

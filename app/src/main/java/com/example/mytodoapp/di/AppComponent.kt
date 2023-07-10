@@ -1,6 +1,9 @@
 package com.example.mytodoapp.di
 
 import com.example.mytodoapp.App
+import com.example.mytodoapp.di.modules.ApplicationModule
+import com.example.mytodoapp.di.modules.DatabaseModule
+import com.example.mytodoapp.di.modules.RepositoryModule
 import com.example.mytodoapp.di.subcomponents.MainTodoListComponent
 import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment
 import com.example.mytodoapp.presentation.MainActivity

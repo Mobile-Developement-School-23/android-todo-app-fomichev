@@ -1,9 +1,10 @@
-package com.example.mytodoapp.di
+package com.example.mytodoapp.di.modules
 
 import android.content.Context
 import androidx.room.Room
 import com.example.mytodoapp.data.db.AppDataBase
 import com.example.mytodoapp.data.db.TodoListDao
+import com.example.mytodoapp.di.ApplicationScope
 import dagger.Module
 import dagger.Provides
 

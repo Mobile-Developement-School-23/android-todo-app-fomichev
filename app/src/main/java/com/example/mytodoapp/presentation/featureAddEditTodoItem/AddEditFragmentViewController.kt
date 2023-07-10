@@ -22,16 +22,26 @@ class AddEditFragmentViewController(
     private val todoItemId: String
 ) {
 
-    private val fragManager = fragment.requireActivity().supportFragmentManager
     private val datePickerHelper by lazy {
         DatePickerHelper(fragment.context as AppCompatActivity)
     }
+    private val fragManager = fragment.requireActivity().supportFragmentManager
     private var isCalendarVisible = false
     private var deadlineItem: Date? = TodoItem.NO_DEADLINE
     private var creationDate = NO_CREATION_DATE
     private var itemDone = false
 
-    fun launchEditMode() = with(binding) {
+
+    fun chooseLaunchMode(todoItemId: String) {
+        initSpinnerPriority()
+        when (todoItemId) {
+            MODE_ADD -> launchAddMode()
+            else -> launchEditMode()
+        }
+
+    }
+
+    private fun launchEditMode() = with(binding) {
         viewModel.getTodoItem(todoItemId)
         if (deadlineItem == TodoItem.NO_DEADLINE) initSwitchCalendar()
         initEditTodoItem()
@@ -98,7 +108,7 @@ class AddEditFragmentViewController(
         binding.spinnerPriority.setSelection(prioritySelection)
     }
 
-    fun launchAddMode() = with(binding) {
+    private fun launchAddMode() = with(binding) {
         isCalendarVisible = true
         initSwitchCalendar()
         btSave.setOnClickListener { saveAddTodoItem() }
@@ -140,7 +150,7 @@ class AddEditFragmentViewController(
         }
     }
 
-    fun initSpinnerPriority() = with(binding) {
+    private fun initSpinnerPriority() = with(binding) {
         ArrayAdapter.createFromResource(
             fragment.requireActivity() as AppCompatActivity,
             R.array.spinner_array,
@@ -166,6 +176,7 @@ class AddEditFragmentViewController(
 
     companion object {
         private const val NO_CREATION_DATE = ""
+        const val MODE_ADD = "-1"
     }
 
 }

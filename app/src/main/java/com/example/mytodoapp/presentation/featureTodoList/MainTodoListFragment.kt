@@ -6,23 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.whenStarted
-import com.example.mytodoapp.R
 import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.databinding.FragmentMainTodoListBinding
-import com.example.mytodoapp.domain.TodoItem
-import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment
-import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment.Companion.MODE_ADD
 import com.example.mytodoapp.presentation.factory.ViewModelFactory
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -48,6 +35,7 @@ class MainTodoListFragment() : Fragment() {
             .create()
             .inject(this)
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

@@ -1,8 +1,7 @@
-package com.example.mytodoapp.di
+package com.example.mytodoapp.di.modules
 
 import android.content.Context
-import androidx.lifecycle.LifecycleOwner
-import com.example.mytodoapp.presentation.featureTodoList.MainTodoListFragment
+import com.example.mytodoapp.di.ApplicationScope
 import dagger.Module
 import dagger.Provides
 

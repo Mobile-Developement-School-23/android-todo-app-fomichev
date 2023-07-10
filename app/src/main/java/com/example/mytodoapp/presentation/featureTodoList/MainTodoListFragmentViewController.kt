@@ -10,11 +10,13 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.example.mytodoapp.R
 import com.example.mytodoapp.databinding.FragmentMainTodoListBinding
 import com.example.mytodoapp.domain.TodoItem
+import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditFragmentViewController.Companion.MODE_ADD
 import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainTodoListFragmentViewController(
+class MainTodoListFragmentViewController (
     private val fragment: MainTodoListFragment,
     private val binding: FragmentMainTodoListBinding,
     private val lifecycleOwner: LifecycleOwner,
@@ -96,7 +98,7 @@ class MainTodoListFragmentViewController(
 
     private fun openAddEditTodoItemFragment(){
         fragManager.beginTransaction()
-            .replace(R.id.rootContainer, AddEditTodoItemFragment.newInstance(AddEditTodoItemFragment.MODE_ADD))
+            .replace(R.id.rootContainer, AddEditTodoItemFragment.newInstance(MODE_ADD))
             .addToBackStack(null).commit()
     }
 }
