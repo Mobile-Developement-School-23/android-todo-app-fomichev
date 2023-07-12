@@ -36,13 +36,23 @@ android {
     kapt{
         generateStubs = true
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.4.6"
+    }
     buildFeatures {
         viewBinding true
+        compose true
     }
 }
 
 dependencies {
-
+    implementation 'androidx.activity:activity-compose:1.7.2'
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.6.1'
+    implementation 'androidx.compose.ui:ui:1.4.3'
+    implementation 'androidx.compose.material:material:1.4.3'
+    implementation 'androidx.compose.runtime:runtime:1.4.3'
+    implementation 'androidx.compose.runtime:runtime-livedata:1.4.3'
+    implementation 'androidx.compose.ui:ui-tooling:1.4.3'
     implementation 'com.google.dagger:dagger:2.46.1'
     kapt 'com.google.dagger:dagger-compiler:2.46.1'
     implementation "androidx.work:work-runtime-ktx:2.7.0"
