@@ -79,6 +79,15 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun updateTodoItem(todoItem: TodoItem) {
+        val updatedList = data.value.toMutableList()
+        val index = updatedList.indexOfFirst { it.id == todoItem.id }
+        if (index != -1) {
+            updatedList[index] = todoItem
+            _data.value = updatedList
+        }
+    }
+
 
     fun changeEnableState(todoItem: TodoItem) {
         viewModelScope.launch {
@@ -87,6 +96,8 @@ class MainViewModel @Inject constructor(
                 editTodoItemUseCase.editTodoItem(newItem)
                 if (connection.isOnline()) updateNetworkItem(newItem)
                 else sharedPreferencesHelper.isNotOnline = true
+
+                updateTodoItem(newItem)
             }
         }
     }

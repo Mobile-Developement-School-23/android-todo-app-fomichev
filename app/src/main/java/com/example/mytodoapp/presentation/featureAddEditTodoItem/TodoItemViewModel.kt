@@ -3,6 +3,7 @@ package com.example.mytodoapp.presentation.featureAddEditTodoItem
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mytodoapp.data.SharedPreferencesHelper
@@ -44,18 +45,21 @@ class TodoItemViewModel @Inject constructor(
     private val editTodoItemUseCase: EditTodoItemUseCase,
     private val deleteShopItemUseCase: DeleteTodoItemUseCase
 ) : ViewModel() {
-
-    private val _errorInputName = MutableLiveData<Boolean>()
     private val _todoItem = MutableLiveData<TodoItem>()
-    val todoItem: LiveData<TodoItem>
-        get() = _todoItem
-
+    val todoItem: LiveData<TodoItem> = _todoItem
+    private val _errorInputName = MutableLiveData<Boolean>()
     fun getTodoItem(todoItemId: String) {
         viewModelScope.launch {
-            val item = getTodoItemUseCase.getTodoItem(todoItemId)
-            _todoItem.value = item
+            val todoItem = getTodoItemUseCase.getTodoItem(todoItemId)
+            _todoItem.value = todoItem
         }
     }
+    suspend fun getTodoItemById(itemId: String): TodoItem {
+        return getTodoItemUseCase.getTodoItem(itemId)
+    }
+
+
+
 
     fun addTodoItem(inputDescription: String?, priority: Importance, done: Boolean,
         creatingDate: Date, changeDate: Date?, deadline: Date?, id: String) {

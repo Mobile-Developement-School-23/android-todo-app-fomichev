@@ -17,6 +17,7 @@
     <string name="do_for">Do it before</string>
     <string name="high_priority"><font color="#FF3B30">!! High</font></string>
     <string name="low_priority">Low</string>
+    <string name="normal_priority">Normal</string>
     <string name="No">No</string>
     <string name="toast_for_empty_edit_text">Fill the field or click cancel button</string>
 
