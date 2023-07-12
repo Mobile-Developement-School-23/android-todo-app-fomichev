@@ -1,7 +1,8 @@
 package com.example.mytodoapp.presentation.featureTodoList
 
-import android.util.Log
-import androidx.lifecycle.Lifecycle
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -42,19 +43,19 @@ import kotlinx.coroutines.launch
  * @property connection The CheckConnection instance for checking network connectivity.
  * @property editTodoItemUseCase The EditTodoItemUseCase instance for editing todo items.
  */
+
 class MainViewModel @Inject constructor(
     private val repository: TodoListRepositoryImpl,
     private val sharedPreferencesHelper: SharedPreferencesHelper,
     private val connection: CheckConnection,
     private val editTodoItemUseCase: EditTodoItemUseCase
 ) : ViewModel() {
-
-    var modeAll: Boolean = true
+    private lateinit var lifecycleOwner: LifecycleOwner
+    var modeAll: Boolean by mutableStateOf(true)
     private var job: Job? = null
 
     private val _data = MutableStateFlow<List<TodoItem>>(emptyList())
-    val data: StateFlow<List<TodoItem>> = _data.asStateFlow()
-    private lateinit var lifecycleOwner: LifecycleOwner
+    val data: StateFlow<List<TodoItem>> = _data
 
     init {
         if (connection.isOnline()) {
@@ -64,23 +65,6 @@ class MainViewModel @Inject constructor(
     }
     fun initLifecycleOwner(owner: LifecycleOwner) {
         lifecycleOwner = owner
-    }
-
-    fun changeEnableState(todoItem: TodoItem) {
-        lifecycleOwner.lifecycleScope.launch {
-            lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                val newItem = todoItem.copy(done = !todoItem.done)
-                editTodoItemUseCase.editTodoItem(newItem)
-                if (connection.isOnline()) updateNetworkItem(newItem)
-                else sharedPreferencesHelper.isNotOnline = true
-            }
-        }
-    }
-
-    fun changeMode() {
-        modeAll = !modeAll
-        job?.cancel()
-        loadData()
     }
 
     private fun loadNetworkList() {
@@ -93,6 +77,24 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             _data.emitAll(repository.getAllData())
         }
+    }
+
+
+    fun changeEnableState(todoItem: TodoItem) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val newItem = todoItem.copy(done = !todoItem.done)
+                editTodoItemUseCase.editTodoItem(newItem)
+                if (connection.isOnline()) updateNetworkItem(newItem)
+                else sharedPreferencesHelper.isNotOnline = true
+            }
+        }
+    }
+
+    fun changeMode() {
+        modeAll = !modeAll
+        job?.cancel()
+        loadData()
     }
 
     private fun updateNetworkItem(todoItem: TodoItem) {

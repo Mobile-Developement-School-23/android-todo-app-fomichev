@@ -10,7 +10,7 @@ import androidx.work.WorkManager
 import com.example.mytodoapp.di.AppComponent
 import com.example.mytodoapp.di.modules.ApplicationModule
 import com.example.mytodoapp.di.DaggerAppComponent
-import com.example.mytodoapp.data.BackgroundWorkerClass
+
 import java.util.concurrent.TimeUnit
 
 /**
@@ -34,16 +34,16 @@ class App() : Application() {
         appComponent.injectApplication(this)
         val constraints =
             Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-        val uploadWorkRequest =
-            PeriodicWorkRequestBuilder<BackgroundWorkerClass>(8, TimeUnit.HOURS).setConstraints(
-                constraints
-            ).build()
-
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "Update",
-            ExistingPeriodicWorkPolicy.KEEP,
-            uploadWorkRequest
-        )
+//        val uploadWorkRequest =
+//            PeriodicWorkRequestBuilder<BackgroundWorkerClass>(8, TimeUnit.HOURS).setConstraints(
+//                constraints
+//            ).build()
+//
+//        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+//            "Update",
+//            ExistingPeriodicWorkPolicy.KEEP,
+//            uploadWorkRequest
+   //     )
     }
 }
 
