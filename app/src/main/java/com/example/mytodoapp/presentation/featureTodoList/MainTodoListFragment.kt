@@ -39,6 +39,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
@@ -49,11 +50,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.fontResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -64,9 +67,13 @@ import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.databinding.FragmentMainTodoListBinding
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
+import com.example.mytodoapp.presentation.LocalMyColors
+import com.example.mytodoapp.presentation.MainTheme
+import com.example.mytodoapp.presentation.MyColors
 import com.example.mytodoapp.presentation.factory.ViewModelFactory
 
 import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment
+import com.example.mytodoapp.presentation.lightPalette
 import javax.inject.Inject
 
 /**
@@ -99,7 +106,10 @@ class MainTodoListFragment : Fragment() {
         viewModel.initLifecycleOwner(viewLifecycleOwner)
         return ComposeView(requireContext()).apply {
             setContent {
-                MainTodoListScreen(viewModel)
+                MainTheme() {
+                    MainTodoListScreen(viewModel)
+                }
+
             }
         }
     }
@@ -120,7 +130,7 @@ fun MainTodoListScreen(viewModel: MainViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                backgroundColor = Color(R.attr.colorPrimary),
+                backgroundColor = LocalMyColors.current.colorBackPrimary,
                 modifier = Modifier.height(165.dp)
             ) {
                 Box(
@@ -134,24 +144,26 @@ fun MainTodoListScreen(viewModel: MainViewModel) {
                         Text(
                             text = stringResource(R.string.my_todo_items),
                             style = MaterialTheme.typography.body1,
-                            color = Color.White
+
+                            color = LocalMyColors.current.colorPrimary
+
                         )
                         Text(
-
-
                             text = stringResource(R.string.number_of_done_todo),
                             style = MaterialTheme.typography.body1,
-                            color = Color.White,
+                            color = LocalMyColors.current.colorTertiary,
                             modifier = Modifier.padding(top = 8.dp)
                         )
                     }
                     IconButton(
                         onClick = { viewModel.changeMode() },
-                        modifier = Modifier.align(Alignment.BottomEnd)
+                        modifier = Modifier.align(Alignment.BottomEnd),
+
+
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_visible),
-                            contentDescription = stringResource(R.string.item_info) //
+                            contentDescription = stringResource(R.string.item_info)
                         )
                     }
                 }
@@ -171,7 +183,7 @@ fun MainTodoListScreen(viewModel: MainViewModel) {
                     .replace(R.id.rootContainer, AddEditTodoItemFragment.newInstance(AddEditTodoItemFragment.MODE_ADD))
                     .addToBackStack(null)
                     .commit()},
-                backgroundColor = MaterialTheme.colors.primary
+                backgroundColor = LocalMyColors.current.colorBlue
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_add),
@@ -187,6 +199,7 @@ fun MainTodoListScreen(viewModel: MainViewModel) {
 @Composable
 fun TodoList(todoItems: List<TodoItem>) {
     LazyColumn {
+
         items(todoItems) { todoItem ->
             TodoItemRow(todoItem)
         }
@@ -233,7 +246,7 @@ fun TodoItemRow(todoItem: TodoItem) {
                     } else R.drawable.ic_low_priority),
                 contentDescription = stringResource(R.string.priority),
                 modifier = Modifier
-                    .size(10.dp)
+                    .size(20.dp)
                     .padding(top = 2.dp)
             )
 
