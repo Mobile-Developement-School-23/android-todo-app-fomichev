@@ -106,7 +106,7 @@ class MainTodoListFragment : Fragment() {
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
     @Composable
     fun MainTodoListScreen(viewModel: MainViewModel) {
-        val todoItems by viewModel.data.collectAsState(emptyList())
+        val todoItems by viewModel.data.collectAsState(mutableListOf())
 
         Scaffold(
             topBar = {
@@ -182,7 +182,7 @@ class MainTodoListFragment : Fragment() {
 
 
     @Composable
-    fun TodoList(todoItems: List<TodoItem>) {
+    fun TodoList(todoItems: MutableList<TodoItem>) {
         LazyColumn {
 
             items(todoItems) { todoItem ->

@@ -17,6 +17,8 @@ import com.example.mytodoapp.domain.usecases.DeleteTodoItemUseCase
 import com.example.mytodoapp.domain.usecases.EditTodoItemUseCase
 import com.example.mytodoapp.domain.usecases.GetTodoItemUseCase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.sql.Date
 import javax.inject.Inject
@@ -45,13 +47,13 @@ class TodoItemViewModel @Inject constructor(
     private val editTodoItemUseCase: EditTodoItemUseCase,
     private val deleteShopItemUseCase: DeleteTodoItemUseCase
 ) : ViewModel() {
-    private val _todoItem = MutableLiveData<TodoItem>()
-    val todoItem: LiveData<TodoItem> = _todoItem
+    private val _todoItem = MutableStateFlow<TodoItem?>(null)
+    val todoItem: StateFlow<TodoItem?> = _todoItem
     private val _errorInputName = MutableLiveData<Boolean>()
     fun getTodoItem(todoItemId: String) {
         viewModelScope.launch {
             val todoItem = getTodoItemUseCase.getTodoItem(todoItemId)
-            _todoItem.value = todoItem
+            _todoItem.emit(todoItem) // Устанавливаем новое значение в MutableStateFlow
         }
     }
     suspend fun getTodoItemById(itemId: String): TodoItem {

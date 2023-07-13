@@ -54,8 +54,8 @@ class MainViewModel @Inject constructor(
     var modeAll: Boolean by mutableStateOf(true)
     private var job: Job? = null
 
-    private val _data = MutableStateFlow<List<TodoItem>>(emptyList())
-    val data: StateFlow<List<TodoItem>> = _data
+    private val _data = MutableStateFlow<MutableList<TodoItem>>(mutableListOf())
+    val data: StateFlow<MutableList<TodoItem>> = _data
 
     init {
         if (connection.isOnline()) {
@@ -75,19 +75,12 @@ class MainViewModel @Inject constructor(
 
     private fun loadData() {
         viewModelScope.launch(Dispatchers.IO) {
-            _data.emitAll(repository.getAllData())
+            repository.getAllData().collect { allData ->
+                val mutableList = allData.toMutableList()
+                _data.value = mutableList
+            }
         }
     }
-
-    fun updateTodoItem(todoItem: TodoItem) {
-        val updatedList = data.value.toMutableList()
-        val index = updatedList.indexOfFirst { it.id == todoItem.id }
-        if (index != -1) {
-            updatedList[index] = todoItem
-            _data.value = updatedList
-        }
-    }
-
 
     fun changeEnableState(todoItem: TodoItem) {
         viewModelScope.launch {
@@ -96,9 +89,17 @@ class MainViewModel @Inject constructor(
                 editTodoItemUseCase.editTodoItem(newItem)
                 if (connection.isOnline()) updateNetworkItem(newItem)
                 else sharedPreferencesHelper.isNotOnline = true
-
                 updateTodoItem(newItem)
             }
+        }
+    }
+
+    fun updateTodoItem(updatedItem: TodoItem) {
+        val updatedList = _data.value.toMutableList()
+        val index = updatedList.indexOfFirst { it.id == updatedItem.id }
+        if (index != -1) {
+            updatedList[index] = updatedItem
+            _data.value = updatedList
         }
     }
 

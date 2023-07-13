@@ -25,28 +25,23 @@ data class MyColors(
     val colorBackElevated: Color
 )
 
-data class MyTypography(
-    val largeTitle: TextSize,
-    val title: TextSize,
-    val button: TextSize,
-    val body: TextSize,
-    val subhead: TextSize,
-)
+
 
 object MyTheme {
     val colors: MyColors
     @Composable
     get() = LocalMyColors.current
 
-    val typography: MyTypography
+    val typography: Typography
         @Composable
         get() = LocalMyTypography.current
+
 }
 
 val LocalMyColors = staticCompositionLocalOf<MyColors> {
     error("No colors provided")
 }
 
-val LocalMyTypography = staticCompositionLocalOf<MyTypography> {
+val LocalMyTypography = staticCompositionLocalOf<Typography> {
     error("No fonts provided")
 }

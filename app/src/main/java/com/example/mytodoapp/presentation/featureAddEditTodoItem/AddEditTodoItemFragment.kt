@@ -49,6 +49,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -87,7 +88,7 @@ class AddEditTodoItemFragment : Fragment() {
     lateinit var viewModelFactory: ViewModelFactory
     private lateinit var viewModel: TodoItemViewModel
     private var todoItemId: String = TodoItem.UNDEFINED_ID
-    var todoItemCopy: TodoItem? = null
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         context.appComponent
@@ -102,6 +103,8 @@ class AddEditTodoItemFragment : Fragment() {
         arguments?.let {
             todoItemId = it.getString(ARG_PARAM1)!!
         }
+        viewModel =
+            ViewModelProvider(requireActivity(), viewModelFactory)[TodoItemViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -109,9 +112,6 @@ class AddEditTodoItemFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel =
-            ViewModelProvider(requireActivity(), viewModelFactory)[TodoItemViewModel::class.java]
-
         return ComposeView(requireContext()).apply {
             setContent {
                 MainTheme() {
@@ -122,15 +122,11 @@ class AddEditTodoItemFragment : Fragment() {
 
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
-    }
 
-    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+    @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SuspiciousIndentation")
     @Composable
     fun AddEditTodoItemScreen() {
-
         var isSwitchOn by remember { mutableStateOf(false) }
         val isEditMode = (todoItemId != MODE_ADD)
         if (todoItemId != MODE_ADD) viewModel.getTodoItem(todoItemId)
@@ -143,30 +139,28 @@ class AddEditTodoItemFragment : Fragment() {
         val (itemDone, setItemDone) = remember { mutableStateOf(false) }
         var expanded by remember { mutableStateOf(false) }
 
-
         LaunchedEffect(Unit) {
             if (isEditMode) {
-                viewModel.todoItem.observe(viewLifecycleOwner, object : Observer<TodoItem?> {
-                    override fun onChanged(todoItem: TodoItem?) {
-                        if (todoItem != null) {
-                            todoItemCopy = todoItem.copy()
-
-                            setDescription(todoItemCopy!!.description)
-                            setPriority(todoItemCopy!!.priority)
-                            setItemDone(todoItemCopy!!.done)
-                            setCreatingDate(todoItemCopy!!.creationDate)
-                            setId(todoItemCopy!!.id)
-                                //  setDeadline(todoItemCopy!!.deadline)
-                            viewModel.todoItem.removeObserver(this)
-                        }
-                    }
-                })
+                viewModel.getTodoItem(todoItemId)
             }
-
         }
-      // val scaffoldState = rememberScaffoldState()
+
+        LaunchedEffect(viewModel.todoItem) {
+            viewModel.todoItem.collect { todoItem ->
+                if (isEditMode && todoItem != null) {
+                    setDescription(todoItem.description)
+                    setPriority(todoItem.priority)
+                    setItemDone(todoItem.done)
+                    setCreatingDate(todoItem.creationDate)
+                    setId(todoItem.id)
+                    // ...
+                }
+            }
+        }
+
+      val scaffoldState = rememberScaffoldState()
         Scaffold(
-      //      scaffoldState = scaffoldState,
+        scaffoldState = scaffoldState,
             topBar = {
                 TopAppBar(
                     backgroundColor = LocalMyColors.current.colorBackPrimary,
@@ -298,8 +292,11 @@ class AddEditTodoItemFragment : Fragment() {
                     ) {
                         IconButton(
                             onClick = {
-                                viewModel.deleteTodoItem(todoItemCopy!!)
-                                requireActivity().onBackPressed()
+                                if (isEditMode) deleteTodoItem()
+                                requireActivity().supportFragmentManager.beginTransaction()
+                                    .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
+                                    .addToBackStack(null)
+                                    .commit()
                             }
                         ) {
                             Icon(
@@ -319,6 +316,16 @@ class AddEditTodoItemFragment : Fragment() {
                 }
             }
         )
+    }
+
+    private fun deleteTodoItem() {
+        viewModel.getTodoItem(todoItemId)
+        val todoDelete = viewModel.todoItem.value
+       viewModel.deleteTodoItem(todoDelete!!)
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun editTodoItem(description: String?, priority: Importance, itemDone: Boolean, creatingDate:Date,
