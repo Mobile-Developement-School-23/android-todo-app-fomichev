@@ -17,6 +17,8 @@ fun MainTheme(
         true -> blackPalette
         else -> lightPalette
     }
+
+
 //    val typography = MyTypography(
 //        largeTitle = TextSize(32.sp),
 //        title =TextUnit(20.sp),

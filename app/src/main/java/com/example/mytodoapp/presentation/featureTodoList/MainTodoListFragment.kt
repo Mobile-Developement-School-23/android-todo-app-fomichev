@@ -2,16 +2,6 @@ package com.example.mytodoapp.presentation.featureTodoList
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.Resources
-import android.content.res.Resources.Theme
-import android.opengl.Visibility
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-
-import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -39,41 +29,32 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.fontResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role.Companion.Image
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.example.mytodoapp.R
 import com.example.mytodoapp.appComponent
-import com.example.mytodoapp.databinding.FragmentMainTodoListBinding
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.presentation.LocalMyColors
 import com.example.mytodoapp.presentation.MainTheme
-import com.example.mytodoapp.presentation.MyColors
 import com.example.mytodoapp.presentation.factory.ViewModelFactory
-
 import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment
-import com.example.mytodoapp.presentation.lightPalette
 import javax.inject.Inject
 
 /**
@@ -122,167 +103,180 @@ class MainTodoListFragment : Fragment() {
     }
 
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
-@Composable
-fun MainTodoListScreen(viewModel: MainViewModel) {
-    val todoItems by viewModel.data.collectAsState(emptyList())
+    @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
+    @Composable
+    fun MainTodoListScreen(viewModel: MainViewModel) {
+        val todoItems by viewModel.data.collectAsState(emptyList())
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                backgroundColor = LocalMyColors.current.colorBackPrimary,
-                modifier = Modifier.height(165.dp)
-            ) {
-                Box(
-                    Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.BottomStart
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    backgroundColor = LocalMyColors.current.colorBackPrimary,
+                    modifier = Modifier.height(165.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(start = 58.dp, bottom = 20.dp),
-                        verticalArrangement = Arrangement.Bottom
+                    Box(
+                        Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.BottomStart
                     ) {
-                        Text(
-                            text = stringResource(R.string.my_todo_items),
-                            style = MaterialTheme.typography.body1,
+                        Column(
+                            modifier = Modifier.padding(start = 58.dp, bottom = 20.dp),
+                            verticalArrangement = Arrangement.Bottom
+                        ) {
+                            Text(
+                                text = stringResource(R.string.my_todo_items),
+                                style = MaterialTheme.typography.body1,
 
-                            color = LocalMyColors.current.colorPrimary
+                                color = LocalMyColors.current.colorPrimary
 
-                        )
-                        Text(
-                            text = stringResource(R.string.number_of_done_todo),
-                            style = MaterialTheme.typography.body1,
-                            color = LocalMyColors.current.colorTertiary,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-                    IconButton(
-                        onClick = { viewModel.changeMode() },
-                        modifier = Modifier.align(Alignment.BottomEnd),
+                            )
+                            Text(
+                                text = stringResource(R.string.number_of_done_todo),
+                                style = MaterialTheme.typography.body1,
+                                color = LocalMyColors.current.colorTertiary,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = { viewModel.changeMode() },
+                            modifier = Modifier.align(Alignment.BottomEnd),
 
 
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_visible),
-                            contentDescription = stringResource(R.string.item_info)
-                        )
+                            ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_visible),
+                                contentDescription = stringResource(R.string.item_info)
+                            )
+                        }
                     }
                 }
-            }
-        },
-        content = {
-            Column(
-                modifier = Modifier.padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                TodoList(todoItems)
-            }
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { parentFragmentManager.beginTransaction()
-                    .replace(R.id.rootContainer, AddEditTodoItemFragment.newInstance(AddEditTodoItemFragment.MODE_ADD))
-                    .addToBackStack(null)
-                    .commit()},
-                backgroundColor = LocalMyColors.current.colorBlue
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_add),
-                    contentDescription = stringResource(R.string.add_new_to_do_item)
-                )
-            }
-        }
-    )
-}
-
-
-
-@Composable
-fun TodoList(todoItems: List<TodoItem>) {
-    LazyColumn {
-
-        items(todoItems) { todoItem ->
-            TodoItemRow(todoItem)
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun TodoItemRow(todoItem: TodoItem) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        elevation = 0.dp,
-        onClick = { parentFragmentManager.beginTransaction()
-            .replace(R.id.rootContainer, AddEditTodoItemFragment.newInstance(todoItem.id))
-            .addToBackStack(null)
-            .commit() },
-        shape = RoundedCornerShape(8.dp),
-        backgroundColor = Color.White,
-
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = todoItem.done,
-                onCheckedChange = { isChecked ->
-                    viewModel.changeEnableState(todoItem)
-                },
-                modifier = Modifier.padding(start = 12.dp)
-            )
-
-            Spacer(modifier = Modifier.width(18.dp))
-
-            Image(
-
-                painter = painterResource(
-                    id = if (todoItem.priority == Importance.HIGH) {
-                        R.drawable.ic_high_priority
-                    } else if (todoItem.priority == Importance.LOW) {
-                        R.drawable.ic_low_priority
-                    } else R.drawable.ic_low_priority),
-                contentDescription = stringResource(R.string.priority),
-                modifier = Modifier
-                    .size(20.dp)
-                    .padding(top = 2.dp)
-            )
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = todoItem.description,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.body1,
-                    color = MaterialTheme.colors.onSurface,
-                    modifier = Modifier.padding(start = 3.dp, bottom = 2.dp)
-
-                )
-
-                if (todoItem.deadline != null) {
-                    Text(
-                        text = todoItem.deadline.toString(),
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
-                        modifier = Modifier.padding(start = 3.dp, top = 2.dp, bottom = 1.dp)
+            },
+            content = {
+                Column(
+                    modifier = Modifier.padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TodoList(todoItems)
+                }
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = {
+                        parentFragmentManager.beginTransaction()
+                            .replace(
+                                R.id.rootContainer,
+                                AddEditTodoItemFragment.newInstance(AddEditTodoItemFragment.MODE_ADD)
+                            )
+                            .addToBackStack(null)
+                            .commit()
+                    },
+                    backgroundColor = LocalMyColors.current.colorBlue
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_add),
+                        contentDescription = stringResource(R.string.add_new_to_do_item)
                     )
                 }
             }
+        )
+    }
 
-            IconButton(
-                onClick = { parentFragmentManager.beginTransaction()
-                    .replace(R.id.rootContainer, AddEditTodoItemFragment.newInstance(todoItem.id))
-                    .addToBackStack(null)
-                    .commit() },
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_info),
-                    contentDescription = stringResource(R.string.item_info)
-                )
+
+    @Composable
+    fun TodoList(todoItems: List<TodoItem>) {
+        LazyColumn {
+
+            items(todoItems) { todoItem ->
+                TodoItemRow(todoItem)
             }
         }
     }
-}}
+
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    fun TodoItemRow(todoItem: TodoItem) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            elevation = 0.dp,
+            onClick = {
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.rootContainer, AddEditTodoItemFragment.newInstance(todoItem.id))
+                    .addToBackStack(null)
+                    .commit()
+            },
+            shape = RoundedCornerShape(8.dp),
+            backgroundColor = Color.White,
+
+            ) {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = todoItem.done,
+                    onCheckedChange = { isChecked ->
+                        viewModel.changeEnableState(todoItem)
+                    },
+                    modifier = Modifier.padding(start = 12.dp)
+                )
+
+                Spacer(modifier = Modifier.width(18.dp))
+
+                if (todoItem.priority != Importance.NORMAL) {
+                    Image(
+                        painter = painterResource(
+                            id = if (todoItem.priority == Importance.HIGH) {
+                                R.drawable.ic_high_priority
+                            } else R.drawable.ic_low_priority
+
+                        ),
+                        contentDescription = stringResource(R.string.priority),
+                        modifier = Modifier
+                            .size(20.dp)
+                            .padding(top = 2.dp)
+                    )
+                }
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = todoItem.description,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.body1,
+                        color = MaterialTheme.colors.onSurface,
+                        modifier = Modifier.padding(start = 3.dp, bottom = 2.dp)
+
+                    )
+
+                    if (todoItem.deadline != null) {
+                        Text(
+                            text = todoItem.deadline.toString(),
+                            style = MaterialTheme.typography.body2,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
+                            modifier = Modifier.padding(start = 3.dp, top = 2.dp, bottom = 1.dp)
+                        )
+                    }
+                }
+
+                IconButton(
+                    onClick = {
+                        parentFragmentManager.beginTransaction()
+                            .replace(
+                                R.id.rootContainer,
+                                AddEditTodoItemFragment.newInstance(todoItem.id)
+                            )
+                            .addToBackStack(null)
+                            .commit()
+                    },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_info),
+                        contentDescription = stringResource(R.string.item_info)
+                    )
+                }
+            }
+        }
+    }
+}
