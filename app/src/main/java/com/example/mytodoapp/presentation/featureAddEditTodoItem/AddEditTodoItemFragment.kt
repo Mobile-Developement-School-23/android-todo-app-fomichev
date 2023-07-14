@@ -55,6 +55,7 @@ import com.example.mytodoapp.R
 import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
+import com.example.mytodoapp.domain.TodoItem.Companion.UNDEFINED_ID
 import com.example.mytodoapp.presentation.LocalMyColors
 import com.example.mytodoapp.presentation.MainTheme
 import com.example.mytodoapp.presentation.factory.ViewModelFactory
@@ -119,7 +120,7 @@ class AddEditTodoItemFragment : Fragment() {
         var (description, setDescription) = remember { mutableStateOf("") }
         var (creatingDate, setCreatingDate) = remember { mutableStateOf(Date(System.currentTimeMillis())) }
         var (changeDate, setChangeDate) = remember { mutableStateOf(Date(System.currentTimeMillis())) }
-        var (id, setId) = remember { mutableStateOf("") }
+        var (id, setId) = remember { mutableStateOf(MODE_ADD) }
         var (priority, setPriority) = remember { mutableStateOf(Importance.NORMAL) }
         var (deadline, setDeadline) = remember { mutableStateOf(Date.valueOf("1980-01-01")) }
         val (itemDone, setItemDone) = remember { mutableStateOf(false) }
@@ -163,7 +164,7 @@ class AddEditTodoItemFragment : Fragment() {
                             Icon(
                                 imageVector = Icons.Filled.ArrowBack,
                                 contentDescription = stringResource(id = R.string.my_todo_items),
-                                tint = LocalMyColors.current.colorRed
+                                tint = LocalMyColors.current.colorPrimary
                             )
                         }
                     },
@@ -179,10 +180,10 @@ class AddEditTodoItemFragment : Fragment() {
                             )
                             else saveTodoItem(description, priority, false, deadline)
                         }) {
-                            Icon(
-                                imageVector = Icons.Filled.Check,
-                                contentDescription = stringResource(id = R.string.my_todo_items),
-                                tint = LocalMyColors.current.colorGreen
+                            Text(
+                                text = stringResource(id = R.string.save),
+                                style = MaterialTheme.typography.button,
+                                color = LocalMyColors.current.colorBlue
                             )
                         }
                     }

@@ -1,5 +1,15 @@
 package com.example.mytodoapp.presentation.featureTodoList
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
@@ -53,6 +63,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -116,7 +127,6 @@ class MainTodoListFragment : Fragment() {
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
     @Composable
     fun MainTodoListScreen(viewModel: MainViewModel) {
-        MainTheme(){
         val todoItems by viewModel.data.collectAsState(mutableListOf())
         val doneTodoCount by viewModel.doneTodoCount.collectAsState()
         val showThemeMenu = remember { mutableStateOf(false) }
@@ -164,16 +174,7 @@ class MainTodoListFragment : Fragment() {
                             modifier = Modifier.align(Alignment.BottomEnd)
                         )
                         {
-                            IconButton(
-                                onClick = { showThemeMenu.value = true },
 
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_theme),
-                                    contentDescription = stringResource(R.string.change_theme),
-                                    tint = LocalMyColors.current.colorBlue
-                                )
-                            }
                             IconButton(
                                 onClick = { viewModel.changeMode() },
 
@@ -206,6 +207,19 @@ class MainTodoListFragment : Fragment() {
                         .background(color = LocalMyColors.current.colorBackElevated)
                 ) {
                     TodoList(todoItems, viewModel)
+                    IconButton(
+                        onClick = { showThemeMenu.value = true },
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(16.dp)
+                            .size(56.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_theme),
+                            contentDescription = stringResource(R.string.change_theme),
+                            tint = LocalMyColors.current.colorBlue
+                        )
+                    }
                 }
                 }
             },
@@ -232,7 +246,6 @@ class MainTodoListFragment : Fragment() {
 
         )
     }
-    }
 
 
     @Composable
@@ -242,7 +255,8 @@ class MainTodoListFragment : Fragment() {
     ) {
         DropdownMenu(
             expanded = true,
-            onDismissRequest = { onCloseMenu() }
+            onDismissRequest = { onCloseMenu() },
+                    modifier = Modifier.padding(end = 16.dp)
         ) {
             DropdownMenuItem(
                 onClick = {

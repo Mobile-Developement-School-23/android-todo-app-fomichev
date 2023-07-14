@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">ToDoApp</string>
     <string name="my_todo_items">Мои дела</string>
-    <string name="save">Сохранить</string>
+    <string name="save">СОХРАНИТЬ</string>
     <string name="cancel">Отмена</string>
     <string name="what_need_to_do">Что надо сделать…</string>
     <string name="priority">Важность</string>
