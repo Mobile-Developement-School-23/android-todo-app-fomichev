@@ -215,13 +215,7 @@ class MainTodoListFragment : Fragment() {
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = {
-                        parentFragmentManager.beginTransaction()
-                            .replace(
-                                R.id.rootContainer,
-                                AddEditTodoItemFragment.newInstance(AddEditTodoItemFragment.MODE_ADD)
-                            )
-                            .addToBackStack(null)
-                            .commit()
+                        openAddEditFrag(AddEditTodoItemFragment.MODE_ADD)
                     },
                     backgroundColor = LocalMyColors.current.colorBlue
                 ) {
@@ -290,6 +284,22 @@ class MainTodoListFragment : Fragment() {
         }
     }
 
+    private fun openAddEditFrag(param:String) {
+        parentFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in_right,
+                R.anim.fade_out,
+                R.anim.fade_in,
+                R.anim.slide_out_to_right
+            )
+            .replace(
+                R.id.rootContainer,
+                AddEditTodoItemFragment.newInstance(param)
+            )
+            .addToBackStack(null)
+            .commit()
+    }
+
 
     @Composable
     fun TodoList(todoItems: MutableList<TodoItem>, viewModel: MainViewModel) {
@@ -319,13 +329,7 @@ class MainTodoListFragment : Fragment() {
                     .padding(8.dp),
                 elevation = 0.dp,
                 onClick = {
-                    parentFragmentManager.beginTransaction()
-                        .replace(
-                            R.id.rootContainer,
-                            AddEditTodoItemFragment.newInstance(todoItem.id)
-                        )
-                        .addToBackStack(null)
-                        .commit()
+                    openAddEditFrag(todoItem.id)
                 },
                 shape = RoundedCornerShape(8.dp),
                 backgroundColor = LocalMyColors.current.colorBackElevated,

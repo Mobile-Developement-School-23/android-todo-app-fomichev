@@ -191,10 +191,7 @@ class AddEditTodoItemFragment : Fragment() {
                 if (isDeleteInProgress) {
                     viewModel.deleteTodoItem(todoDelete!!)
                     isDeleteInProgress = false
-                    requireActivity().supportFragmentManager.beginTransaction()
-                        .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
-                        .addToBackStack(null)
-                        .commit()
+                    openMainFrag()
                 }
             }
         }
@@ -209,10 +206,7 @@ class AddEditTodoItemFragment : Fragment() {
                     title = {},
                     navigationIcon = {
                         IconButton(onClick = {
-                            requireActivity().supportFragmentManager.beginTransaction()
-                                .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
-                                .addToBackStack(null)
-                                .commit()
+                            openMainFrag()
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.ArrowBack,
@@ -432,15 +426,21 @@ class AddEditTodoItemFragment : Fragment() {
         }
     }
 
-//    private fun deleteTodoItem() {
-//        viewModel.getTodoItem(todoItemId)
-//        val todoDelete = viewModel.todoItem.value
-//        viewModel.deleteTodoItem(todoDelete!!)
-//        requireActivity().supportFragmentManager.beginTransaction()
-//            .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
-//            .addToBackStack(null)
-//            .commit()
-//    }
+    private fun openMainFrag() {
+        parentFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in_right,
+                R.anim.fade_out,
+                R.anim.fade_in,
+                R.anim.slide_out_to_right
+            )
+            .replace(
+                R.id.rootContainer,
+                MainTodoListFragment.newInstance()
+            )
+            .addToBackStack(null)
+            .commit()
+    }
 
     private fun editTodoItem(
         description: String?,
@@ -467,10 +467,7 @@ class AddEditTodoItemFragment : Fragment() {
             deadline,
             id
         )
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
-            .addToBackStack(null)
-            .commit()
+        openMainFrag()
     }
 
 
@@ -498,10 +495,7 @@ class AddEditTodoItemFragment : Fragment() {
             deadline,
             id
         )
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
-            .addToBackStack(null)
-            .commit()
+        openMainFrag()
     }
 
 
