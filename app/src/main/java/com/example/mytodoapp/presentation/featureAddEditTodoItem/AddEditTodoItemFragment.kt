@@ -130,7 +130,7 @@ class AddEditTodoItemFragment : Fragment() {
         var (deadline, setDeadline) = remember { mutableStateOf(Date.valueOf("1980-01-01")) }
         val (itemDone, setItemDone) = remember { mutableStateOf(false) }
         var expanded by remember { mutableStateOf(false) }
-
+        var snackbarVisible by remember { mutableStateOf(true) }
         val coroutineScope = rememberCoroutineScope()
 
          var deleteJob: Job? = null
@@ -155,10 +155,16 @@ class AddEditTodoItemFragment : Fragment() {
                     setId(todoItem.id)
                     todoItem.deadline?.let { setDeadline(it) }
 
+
                 }
             }
         }
-
+        val maxLength = 15
+        val shortenedDescription = if (description.length > maxLength) {
+            description.substring(0, maxLength) + "..."
+        } else {
+            description
+        }
         fun cancelDelete() {
             isDeleteInProgress = false
             showUndoSnackbar = false
@@ -375,18 +381,29 @@ class AddEditTodoItemFragment : Fragment() {
                                     modifier = Modifier.padding(16.dp),
                                     action = {
                                         TextButton(onClick = { cancelDelete() }) {
-                                            Text(text = "Отменить")
+                                            Text(text = stringResource(R.string.cancel_snackbar), color = LocalMyColors.current.colorRed)
                                         }
-                                    }
+                                    },
+                                    backgroundColor = LocalMyColors.current.colorGray
                                 ) {
-                                    Text(
-                                        text = "Удалить Имя_Дела",
-                                        style = MaterialTheme.typography.subtitle1
-                                    )
-                                    Text(
-                                        text = countdown.toString(),
-                                        style = MaterialTheme.typography.body1
-                                    )
+                                    Column(
+                                        modifier = Modifier.padding(vertical = 8.dp)
+                                    ) {
+                                        Text(
+                                            text = "Удалить ${shortenedDescription}?",
+                                            style = LocalMyTypography.current.body2,
+                                            color = LocalMyColors.current.colorWhite,
+                                            modifier = Modifier.padding(vertical = 4.dp)
+                                        )
+                                        Text(
+                                            text = countdown.toString(),
+                                            style = LocalMyTypography.current.body1,
+                                            color = LocalMyColors.current.colorWhite,
+                                                    modifier = Modifier
+                                                        .padding(vertical = 4.dp)
+                                                        .padding(start = 18.dp)
+                                        )
+                                    }
                                 }
                             }
                         }

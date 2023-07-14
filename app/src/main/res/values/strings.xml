@@ -25,5 +25,6 @@
     <string name="light_theme">Light Theme</string>
     <string name="dark_theme">Dark Theme</string>
     <string name="system_theme">System Theme</string>
+    <string name="cancel_snackbar">Cancel</string>
 
 </resources>

@@ -22,4 +22,5 @@
     <string name="dark_theme">Темная тема</string>
     <string name="system_theme">Системная тема</string>
     <string name="change_theme">Изменить тему</string>
+    <string name="cancel_snackbar">Отменить</string>
 </resources>
