@@ -53,10 +53,11 @@ class MainViewModel @Inject constructor(
     private lateinit var lifecycleOwner: LifecycleOwner
     var modeAll: Boolean by mutableStateOf(true)
     private var job: Job? = null
-
+    var showDoneItems: Boolean by mutableStateOf(true)
     private val _data = MutableStateFlow<MutableList<TodoItem>>(mutableListOf())
     val data: StateFlow<MutableList<TodoItem>> = _data
-
+    private val _doneTodoCount = MutableStateFlow(0)
+    val doneTodoCount: StateFlow<Int> = _doneTodoCount
     init {
         if (connection.isOnline()) {
             loadNetworkList()
@@ -78,8 +79,14 @@ class MainViewModel @Inject constructor(
             repository.getAllData().collect { allData ->
                 val mutableList = allData.toMutableList()
                 _data.value = mutableList
+                updateDoneTodoCount(mutableList)
             }
         }
+    }
+
+    private fun updateDoneTodoCount(todoItems: List<TodoItem>) {
+        val doneCount = todoItems.count { it.done }
+        _doneTodoCount.value = doneCount
     }
 
     fun changeEnableState(todoItem: TodoItem) {
@@ -104,6 +111,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun changeMode() {
+        showDoneItems = !showDoneItems
         modeAll = !modeAll
         job?.cancel()
         loadData()

@@ -3,13 +3,16 @@ package com.example.mytodoapp.presentation.featureTodoList
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +35,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -107,7 +111,7 @@ class MainTodoListFragment : Fragment() {
     @Composable
     fun MainTodoListScreen(viewModel: MainViewModel) {
         val todoItems by viewModel.data.collectAsState(mutableListOf())
-
+        val doneTodoCount by viewModel.doneTodoCount.collectAsState()
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -124,13 +128,12 @@ class MainTodoListFragment : Fragment() {
                         ) {
                             Text(
                                 text = stringResource(R.string.my_todo_items),
-                                style = MaterialTheme.typography.body1,
-
+                                style = MaterialTheme.typography.h4,
                                 color = LocalMyColors.current.colorPrimary
 
                             )
                             Text(
-                                text = stringResource(R.string.number_of_done_todo),
+                                text = "${stringResource(R.string.number_of_done_todo)} $doneTodoCount",
                                 style = MaterialTheme.typography.body1,
                                 color = LocalMyColors.current.colorTertiary,
                                 modifier = Modifier.padding(top = 8.dp)
@@ -138,13 +141,18 @@ class MainTodoListFragment : Fragment() {
                         }
                         IconButton(
                             onClick = { viewModel.changeMode() },
-                            modifier = Modifier.align(Alignment.BottomEnd),
+                            modifier = Modifier.align(Alignment.BottomEnd)
+                        ) {
+                            val icon = if (viewModel.showDoneItems) {
+                                painterResource(R.drawable.ic_visible)
+                            } else {
+                                painterResource(R.drawable.ic_invisible)
+                            }
 
-
-                            ) {
                             Icon(
-                                painter = painterResource(R.drawable.ic_visible),
-                                contentDescription = stringResource(R.string.item_info)
+                                painter = icon,
+                                contentDescription = stringResource(R.string.item_info),
+                                tint = LocalMyColors.current.colorBlue
                             )
                         }
                     }
@@ -152,10 +160,17 @@ class MainTodoListFragment : Fragment() {
             },
             content = {
                 Column(
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier
+                        .background(color = LocalMyColors.current.colorBackElevated),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .background(color = LocalMyColors.current.colorBackElevated)
                 ) {
-                    TodoList(todoItems)
+                    TodoList(todoItems, viewModel)
+                }
                 }
             },
             floatingActionButton = {
@@ -182,10 +197,16 @@ class MainTodoListFragment : Fragment() {
 
 
     @Composable
-    fun TodoList(todoItems: MutableList<TodoItem>) {
-        LazyColumn {
+    fun TodoList(todoItems: MutableList<TodoItem>, viewModel: MainViewModel)  {
+        val filteredItems = if (viewModel.showDoneItems) {
+            todoItems
+        } else {
+            todoItems.filter { !it.done }
+        }
 
-            items(todoItems) { todoItem ->
+
+        LazyColumn {
+            items(filteredItems) { todoItem ->
                 TodoItemRow(todoItem)
             }
         }
@@ -197,7 +218,7 @@ class MainTodoListFragment : Fragment() {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(8.dp),
             elevation = 0.dp,
             onClick = {
                 parentFragmentManager.beginTransaction()
@@ -206,7 +227,7 @@ class MainTodoListFragment : Fragment() {
                     .commit()
             },
             shape = RoundedCornerShape(8.dp),
-            backgroundColor = Color.White,
+            backgroundColor = LocalMyColors.current.colorBackElevated,
 
             ) {
             Row(
@@ -244,7 +265,7 @@ class MainTodoListFragment : Fragment() {
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.body1,
-                        color = MaterialTheme.colors.onSurface,
+                        color = LocalMyColors.current.colorPrimary,
                         modifier = Modifier.padding(start = 3.dp, bottom = 2.dp)
 
                     )
