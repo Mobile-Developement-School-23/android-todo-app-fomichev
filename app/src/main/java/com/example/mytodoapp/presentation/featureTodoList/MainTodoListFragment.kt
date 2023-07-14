@@ -7,6 +7,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +28,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Checkbox
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -45,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,6 +61,7 @@ import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.presentation.LocalMyColors
+import com.example.mytodoapp.presentation.MainActivity
 import com.example.mytodoapp.presentation.MainTheme
 import com.example.mytodoapp.presentation.factory.ViewModelFactory
 import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment
@@ -110,8 +116,24 @@ class MainTodoListFragment : Fragment() {
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
     @Composable
     fun MainTodoListScreen(viewModel: MainViewModel) {
+        MainTheme(){
         val todoItems by viewModel.data.collectAsState(mutableListOf())
         val doneTodoCount by viewModel.doneTodoCount.collectAsState()
+        val showThemeMenu = remember { mutableStateOf(false) }
+        val selectedThemeMode = remember { mutableStateOf(AppCompatDelegate.MODE_NIGHT_NO) }
+
+        if (showThemeMenu.value) {
+            ThemeMenuPopup(
+                onCloseMenu = { showThemeMenu.value = false },
+                onThemeSelected = { themeMode ->
+                    selectedThemeMode.value = themeMode
+                    showThemeMenu.value = false
+                   val act = requireActivity() as MainActivity
+                    act.updateAppTheme(selectedThemeMode.value)
+                }
+            )
+        }
+
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -130,7 +152,6 @@ class MainTodoListFragment : Fragment() {
                                 text = stringResource(R.string.my_todo_items),
                                 style = MaterialTheme.typography.h4,
                                 color = LocalMyColors.current.colorPrimary
-
                             )
                             Text(
                                 text = "${stringResource(R.string.number_of_done_todo)} $doneTodoCount",
@@ -139,21 +160,36 @@ class MainTodoListFragment : Fragment() {
                                 modifier = Modifier.padding(top = 8.dp)
                             )
                         }
-                        IconButton(
-                            onClick = { viewModel.changeMode() },
+                        Column(
                             modifier = Modifier.align(Alignment.BottomEnd)
-                        ) {
-                            val icon = if (viewModel.showDoneItems) {
-                                painterResource(R.drawable.ic_visible)
-                            } else {
-                                painterResource(R.drawable.ic_invisible)
-                            }
+                        )
+                        {
+                            IconButton(
+                                onClick = { showThemeMenu.value = true },
 
-                            Icon(
-                                painter = icon,
-                                contentDescription = stringResource(R.string.item_info),
-                                tint = LocalMyColors.current.colorBlue
-                            )
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_theme),
+                                    contentDescription = stringResource(R.string.change_theme),
+                                    tint = LocalMyColors.current.colorBlue
+                                )
+                            }
+                            IconButton(
+                                onClick = { viewModel.changeMode() },
+
+                            ) {
+                                val icon = if (viewModel.showDoneItems) {
+                                    painterResource(R.drawable.ic_visible)
+                                } else {
+                                    painterResource(R.drawable.ic_invisible)
+                                }
+
+                                Icon(
+                                    painter = icon,
+                                    contentDescription = stringResource(R.string.item_info),
+                                    tint = LocalMyColors.current.colorBlue
+                                )
+                            }
                         }
                     }
                 }
@@ -191,23 +227,65 @@ class MainTodoListFragment : Fragment() {
                         contentDescription = stringResource(R.string.add_new_to_do_item)
                     )
                 }
+
             }
+
         )
+    }
     }
 
 
     @Composable
-    fun TodoList(todoItems: MutableList<TodoItem>, viewModel: MainViewModel)  {
-        val filteredItems = if (viewModel.showDoneItems) {
-            todoItems
-        } else {
-            todoItems.filter { !it.done }
+    fun ThemeMenuPopup(
+        onCloseMenu: () -> Unit,
+        onThemeSelected: (Int) -> Unit
+    ) {
+        DropdownMenu(
+            expanded = true,
+            onDismissRequest = { onCloseMenu() }
+        ) {
+            DropdownMenuItem(
+                onClick = {
+                    onThemeSelected(AppCompatDelegate.MODE_NIGHT_NO)
+                    onCloseMenu()
+                }
+            ) {
+                Text("Light Theme")
+            }
+            DropdownMenuItem(
+                onClick = {
+                    onThemeSelected(AppCompatDelegate.MODE_NIGHT_YES)
+                    onCloseMenu()
+                }
+            ) {
+                Text("Dark Theme")
+            }
+            DropdownMenuItem(
+                onClick = {
+                    onThemeSelected(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                    onCloseMenu()
+                }
+            ) {
+                Text("System Theme")
+            }
         }
+    }
+    
+
+    @Composable
+    fun TodoList(todoItems: MutableList<TodoItem>, viewModel: MainViewModel)  {
+        MainTheme() {
+            val filteredItems = if (viewModel.showDoneItems) {
+                todoItems
+            } else {
+                todoItems.filter { !it.done }
+            }
 
 
-        LazyColumn {
-            items(filteredItems) { todoItem ->
-                TodoItemRow(todoItem)
+            LazyColumn {
+                items(filteredItems) { todoItem ->
+                    TodoItemRow(todoItem)
+                }
             }
         }
     }
@@ -215,6 +293,7 @@ class MainTodoListFragment : Fragment() {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     fun TodoItemRow(todoItem: TodoItem) {
+        MainTheme(){
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -299,5 +378,6 @@ class MainTodoListFragment : Fragment() {
                 }
             }
         }
+    }
     }
 }

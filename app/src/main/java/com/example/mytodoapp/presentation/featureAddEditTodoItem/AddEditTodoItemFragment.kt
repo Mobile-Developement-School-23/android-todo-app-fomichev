@@ -1,19 +1,14 @@
 package com.example.mytodoapp.presentation.featureAddEditTodoItem
 
-import androidx.compose.runtime.getValue
+
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-
-
-
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,46 +17,39 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Switch
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.mytodoapp.R
 import com.example.mytodoapp.appComponent
@@ -71,7 +59,6 @@ import com.example.mytodoapp.presentation.LocalMyColors
 import com.example.mytodoapp.presentation.MainTheme
 import com.example.mytodoapp.presentation.factory.ViewModelFactory
 import com.example.mytodoapp.presentation.featureTodoList.MainTodoListFragment
-import org.w3c.dom.Text
 import java.sql.Date
 import java.util.UUID
 import javax.inject.Inject
@@ -123,7 +110,6 @@ class AddEditTodoItemFragment : Fragment() {
     }
 
 
-
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SuspiciousIndentation")
     @Composable
     fun AddEditTodoItemScreen() {
@@ -135,7 +121,7 @@ class AddEditTodoItemFragment : Fragment() {
         var (changeDate, setChangeDate) = remember { mutableStateOf(Date(System.currentTimeMillis())) }
         var (id, setId) = remember { mutableStateOf("") }
         var (priority, setPriority) = remember { mutableStateOf(Importance.NORMAL) }
-      //  val (deadline, setDeadline) = remember { mutableStateOf(TodoItem.NO_DEADLINE) }
+        var (deadline, setDeadline) = remember { mutableStateOf(Date.valueOf("1980-01-01")) }
         val (itemDone, setItemDone) = remember { mutableStateOf(false) }
         var expanded by remember { mutableStateOf(false) }
 
@@ -153,46 +139,60 @@ class AddEditTodoItemFragment : Fragment() {
                     setItemDone(todoItem.done)
                     setCreatingDate(todoItem.creationDate)
                     setId(todoItem.id)
-                    // ...
+                    todoItem.deadline?.let { setDeadline(it) }
+
                 }
             }
         }
 
-      val scaffoldState = rememberScaffoldState()
+
+        val scaffoldState = rememberScaffoldState()
         Scaffold(
-        scaffoldState = scaffoldState,
+            scaffoldState = scaffoldState,
             topBar = {
                 TopAppBar(
                     backgroundColor = LocalMyColors.current.colorBackPrimary,
-                    title = {
-                        Text(
-                            text = stringResource(id = R.string.my_todo_items),
-                            style = MaterialTheme.typography.subtitle1
-                        )
-                    },
+                    title = {},
                     navigationIcon = {
-                        IconButton(onClick = {  requireActivity().supportFragmentManager.beginTransaction()
-                            .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
-                            .addToBackStack(null)
-                            .commit() }) {
+                        IconButton(onClick = {
+                            requireActivity().supportFragmentManager.beginTransaction()
+                                .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
+                                .addToBackStack(null)
+                                .commit()
+                        }) {
                             Icon(
                                 imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.my_todo_items)
+                                contentDescription = stringResource(id = R.string.my_todo_items),
+                                tint = LocalMyColors.current.colorRed
                             )
                         }
                     },
                     actions = {
-                        IconButton(onClick = { if (isEditMode) editTodoItem(description, priority, itemDone, creatingDate, id)
-                            else saveTodoItem(description, priority, false) }) {
+                        IconButton(onClick = {
+                            if (isEditMode) editTodoItem(
+                                description,
+                                priority,
+                                itemDone,
+                                deadline,
+                                creatingDate,
+                                id
+                            )
+                            else saveTodoItem(description, priority, false, deadline)
+                        }) {
                             Icon(
                                 imageVector = Icons.Filled.Check,
-                                contentDescription = stringResource(id = R.string.my_todo_items)
+                                contentDescription = stringResource(id = R.string.my_todo_items),
+                                tint = LocalMyColors.current.colorGreen
                             )
                         }
                     }
                 )
             },
             content = {
+                Box(modifier = Modifier
+                .fillMaxSize()
+                .background(color = LocalMyColors.current.colorBackPrimary))
+            {
                 Column(
                     modifier = Modifier
                         .padding(16.dp)
@@ -211,9 +211,9 @@ class AddEditTodoItemFragment : Fragment() {
                                 .fillMaxSize()
                                 .padding(8.dp),
                             value = description,
-                            onValueChange = { setDescription(it)},
+                            onValueChange = { setDescription(it) },
                             textStyle = LocalTextStyle.current.copy(
-                                color = MaterialTheme.colors.onSurface
+                                color = LocalMyColors.current.colorPrimary
                             ),
                             singleLine = false,
                             maxLines = Int.MAX_VALUE,
@@ -236,9 +236,10 @@ class AddEditTodoItemFragment : Fragment() {
                                 Importance.HIGH -> stringResource(id = R.string.high_priority)
                                 else -> stringResource(id = R.string.normal_priority)
                             },
+                            color = LocalMyColors.current.colorPrimary,
                             modifier = Modifier
                                 .padding(16.dp)
-                                .clickable { expanded = true }
+                                .clickable { expanded = true}
                         )
                         DropdownMenu(
                             expanded = expanded,
@@ -263,25 +264,35 @@ class AddEditTodoItemFragment : Fragment() {
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = stringResource(id = R.string.do_for),
-                            modifier = Modifier.weight(0.3f),
-                            style = MaterialTheme.typography.subtitle1
-                        )
+                        Column(
+                            modifier = Modifier.weight(0.3f)
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.do_for),
+                                color = LocalMyColors.current.colorPrimary,
+                                style = MaterialTheme.typography.subtitle1
+                            )
+                            if (isSwitchOn) {
+                                Text(
+                                    text = "21.07.2023",
+                                    color = LocalMyColors.current.colorPrimary,
+                                    style = MaterialTheme.typography.body1
+                                )
+                            }
+                        }
 
                         Switch(
                             checked = isSwitchOn,
-                            onCheckedChange = { isSwitchOn = it },
+                            onCheckedChange = { isChecked ->
+                                isSwitchOn = isChecked
+                                if (isChecked) {
+                                    deadline = Date.valueOf("2023-07-21")
+                                } else {
+                                    deadline = Date.valueOf("1980-01-01")
+                                }
+                            },
                             modifier = Modifier.padding(start = 16.dp)
                         )
-                        if (isSwitchOn) {
-                            Text(
-                                text = "deadline",
-                                modifier = Modifier.padding(start = 8.dp),
-                                color = MaterialTheme.colors.primary,
-                                style = MaterialTheme.typography.body1
-                            )
-                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -315,30 +326,45 @@ class AddEditTodoItemFragment : Fragment() {
                     }
                 }
             }
+            }
         )
     }
 
     private fun deleteTodoItem() {
         viewModel.getTodoItem(todoItemId)
         val todoDelete = viewModel.todoItem.value
-       viewModel.deleteTodoItem(todoDelete!!)
+        viewModel.deleteTodoItem(todoDelete!!)
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
             .addToBackStack(null)
             .commit()
     }
 
-    private fun editTodoItem(description: String?, priority: Importance, itemDone: Boolean, creatingDate:Date,
-                              id: String) {
+    private fun editTodoItem(
+        description: String?,
+        priority: Importance,
+        itemDone: Boolean,
+        deadline: Date?,
+        creatingDate: Date,
+        id: String
+    ) {
         val inputDescription = description?.trim()
         val priority = priority
         val done = itemDone
         val creatingDate = creatingDate
         val changeDate = Date(System.currentTimeMillis())
-        val deadline = null
+        val deadline = if (deadline == Date.valueOf("1980-01-01")) null else deadline
         val id = id
 
-        viewModel.editTodoItem(inputDescription, priority, done, creatingDate, changeDate, deadline, id)
+        viewModel.editTodoItem(
+            inputDescription,
+            priority,
+            done,
+            creatingDate,
+            changeDate,
+            deadline,
+            id
+        )
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
             .addToBackStack(null)
@@ -346,16 +372,30 @@ class AddEditTodoItemFragment : Fragment() {
     }
 
 
-    private fun saveTodoItem(description: String?, priority: Importance, itemDone: Boolean, id: String = MODE_ADD) {
+    private fun saveTodoItem(
+        description: String?,
+        priority: Importance,
+        itemDone: Boolean,
+        deadline: Date?,
+        id: String = MODE_ADD
+    ) {
         val inputDescription = description?.trim()
         val priority = priority
         val done = itemDone
         val creatingDate = Date(System.currentTimeMillis())
         val changeDate = Date(System.currentTimeMillis())
-        val deadline = null
+        val deadline = if (deadline == Date.valueOf("1980-01-01")) null else deadline
         val id = UUID.randomUUID().toString()
 
-        viewModel.addTodoItem(inputDescription, priority, done, creatingDate, changeDate, deadline, id)
+        viewModel.addTodoItem(
+            inputDescription,
+            priority,
+            done,
+            creatingDate,
+            changeDate,
+            deadline,
+            id
+        )
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
             .addToBackStack(null)
@@ -400,111 +440,6 @@ fun PriorityItems(
     }
 }
 
-@Composable
-fun PrioritySelector(
-    priority: Importance,
-    onPrioritySelected: (Importance) -> Unit
-) {
-    val priorityItems = listOf(
-        Pair(Importance.LOW, stringResource(R.string.low_priority)),
-        Pair(Importance.NORMAL, stringResource(R.string.normal_priority)),
-        Pair(Importance.HIGH, stringResource(R.string.high_priority))
-    )
-
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Text(
-            text = stringResource(R.string.priority),
-            modifier = Modifier.align(Alignment.CenterStart),
-            style = MaterialTheme.typography.subtitle1
-        )
-
-        DropdownMenu(
-            modifier = Modifier.align(Alignment.CenterEnd),
-            expanded = false,
-            onDismissRequest = { },
-            content = {
-                priorityItems.forEach { (itemPriority, itemText) ->
-                    DropdownMenuItem(
-                        onClick = {
-                            onPrioritySelected(itemPriority)
-                        }
-                    ) {
-                        Text(text = itemText)
-                    }
-                }
-            })
-            Box(
-                modifier = Modifier
-                    .clickable(
-                        interactionSource = MutableInteractionSource(),
-                        indication = null
-                    ) { }
-            ) {
-                Text(text = priority.toString())
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = null
-                )
-            }
-        }
-    }
 
 
-@Composable
-fun DeadlineSwitch(
-    isEditMode: Boolean,
-    deadline: Date,
-    onDeadlineChanged: (Date) -> Unit
-) {
-    var isSwitchOn by remember { mutableStateOf(isEditMode && deadline != TodoItem.NO_DEADLINE) }
-    var isCalendarVisible by remember { mutableStateOf(isEditMode && deadline != TodoItem.NO_DEADLINE) }
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(
-            modifier = Modifier.weight(0.3f),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = stringResource(R.string.do_for),
-                style = MaterialTheme.typography.subtitle1
-            )
-            Text(
-                text = if (isCalendarVisible) {
-                    deadline.toString()
-                } else {
-                    ""
-                },
-                modifier = Modifier.padding(top = 2.dp),
-                color = MaterialTheme.colors.primary,
-                style = MaterialTheme.typography.body1,
-                //visibility = if (isSwitchOn) {
-               //     View.VISIBLE
-              //  } else {
-              //      View.GONE
-             //   }
-            )
-        }
-
-        Switch(
-            checked = isSwitchOn,
-            onCheckedChange = { isChecked ->
-                isSwitchOn = isChecked
-                isCalendarVisible = isChecked
-                if (!isChecked) {
-                    TodoItem.NO_DEADLINE?.let { onDeadlineChanged(it) }
-                }
-            },
-            modifier = Modifier.padding(start = 16.dp),
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colors.primary,
-                uncheckedThumbColor = MaterialTheme.colors.onSurface,
-                uncheckedTrackColor = MaterialTheme.colors.onSurface.copy(alpha = 0.4f)
-            )
-        )
-    }
-}
