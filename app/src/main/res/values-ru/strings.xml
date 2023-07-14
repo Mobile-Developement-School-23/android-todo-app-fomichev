@@ -18,4 +18,8 @@
     <string name="item_info">Информация</string>
     <string name="delete">Удалить</string>
     <string name="new_item">Новый</string>
+    <string name="light_theme">Светлая тема</string>
+    <string name="dark_theme">Темная тема</string>
+    <string name="system_theme">Системная тема</string>
+    <string name="change_theme">Изменить тему</string>
 </resources>

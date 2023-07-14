@@ -32,8 +32,8 @@ fun MainTheme(
         ),
         subtitle1 = TextStyle(
             fontFamily = FontFamily.Default,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp
+            fontWeight = FontWeight.Normal,
+            fontSize = 18.sp
         ),
         button = TextStyle(
             fontFamily = FontFamily.Default,
@@ -55,7 +55,7 @@ fun MainTheme(
 
     CompositionLocalProvider(
         LocalMyColors provides colors,
-      //  LocalMyTypography provides typography,
+       LocalMyTypography provides typography,
         content = content
     )
 }

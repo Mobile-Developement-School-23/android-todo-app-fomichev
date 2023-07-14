@@ -27,21 +27,12 @@ data class MyColors(
 
 
 
-object MyTheme {
-    val colors: MyColors
-    @Composable
-    get() = LocalMyColors.current
 
-    val typography: Typography
-        @Composable
-        get() = LocalMyTypography.current
-
-}
 
 val LocalMyColors = staticCompositionLocalOf<MyColors> {
     error("No colors provided")
 }
 
-val LocalMyTypography = staticCompositionLocalOf<Typography> {
+val LocalMyTypography = staticCompositionLocalOf<androidx.compose.material.Typography> {
     error("No fonts provided")
 }

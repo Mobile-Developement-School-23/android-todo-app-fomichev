@@ -22,5 +22,8 @@
     <string name="normal_priority_drop">Normal priority</string>
     <string name="toast_for_empty_edit_text">Fill the field or click cancel button</string>
     <string name="change_theme">change_theme</string>
+    <string name="light_theme">Light Theme</string>
+    <string name="dark_theme">Dark Theme</string>
+    <string name="system_theme">System Theme</string>
 
 </resources>

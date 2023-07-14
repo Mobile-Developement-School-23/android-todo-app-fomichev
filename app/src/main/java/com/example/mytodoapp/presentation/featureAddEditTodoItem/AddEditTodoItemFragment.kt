@@ -57,6 +57,7 @@ import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.domain.TodoItem.Companion.UNDEFINED_ID
 import com.example.mytodoapp.presentation.LocalMyColors
+import com.example.mytodoapp.presentation.LocalMyTypography
 import com.example.mytodoapp.presentation.MainTheme
 import com.example.mytodoapp.presentation.factory.ViewModelFactory
 import com.example.mytodoapp.presentation.featureTodoList.MainTodoListFragment
@@ -182,8 +183,9 @@ class AddEditTodoItemFragment : Fragment() {
                         }) {
                             Text(
                                 text = stringResource(id = R.string.save),
-                                style = MaterialTheme.typography.button,
-                                color = LocalMyColors.current.colorBlue
+                                style = LocalMyTypography.current.body2,
+                                color = LocalMyColors.current.colorBlue,
+                                        modifier = Modifier.padding(end = 8.dp)
                             )
                         }
                     }
@@ -271,13 +273,13 @@ class AddEditTodoItemFragment : Fragment() {
                             Text(
                                 text = stringResource(id = R.string.do_for),
                                 color = LocalMyColors.current.colorPrimary,
-                                style = MaterialTheme.typography.subtitle1
+                                style = LocalMyTypography.current.body2
                             )
                             if (isSwitchOn) {
                                 Text(
                                     text = "21.07.2023",
                                     color = LocalMyColors.current.colorPrimary,
-                                    style = MaterialTheme.typography.body1
+                                    style = LocalMyTypography.current.body2
                                 )
                             }
                         }
@@ -320,8 +322,8 @@ class AddEditTodoItemFragment : Fragment() {
 
                         Text(
                             text = stringResource(id = R.string.delete),
-                            style = MaterialTheme.typography.subtitle1,
-                            color = MaterialTheme.colors.error,
+                            style = LocalMyTypography.current.subtitle1,
+                            color = LocalMyColors.current.colorRed,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
@@ -329,6 +331,22 @@ class AddEditTodoItemFragment : Fragment() {
             }
             }
         )
+    }
+    @Preview("Light Theme", showBackground = true)
+    @Composable
+    fun AddEditTodoItemScreenLightPreview() {
+        MainTheme {
+            AddEditTodoItemScreen()
+
+        }
+    }
+
+    @Preview("Dark Theme", showBackground = true)
+    @Composable
+    fun AddEditTodoItemScreenDarkPreview() {
+        MainTheme(darkTheme = true) {
+            AddEditTodoItemScreen()
+        }
     }
 
     private fun deleteTodoItem() {
@@ -403,6 +421,8 @@ class AddEditTodoItemFragment : Fragment() {
             .commit()
     }
 
+
+
     companion object {
         const val MODE_ADD = "-1"
         private const val ARG_PARAM1 = "param1"
@@ -416,7 +436,10 @@ class AddEditTodoItemFragment : Fragment() {
             }
         }
     }
-}
+
+
+
+
 
 @Composable
 fun PriorityItems(
@@ -439,6 +462,7 @@ fun PriorityItems(
             )
         }
     }
+}
 }
 
 

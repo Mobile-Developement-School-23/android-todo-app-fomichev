@@ -53,7 +53,7 @@ class TodoItemViewModel @Inject constructor(
     fun getTodoItem(todoItemId: String) {
         viewModelScope.launch {
             val todoItem = getTodoItemUseCase.getTodoItem(todoItemId)
-            _todoItem.emit(todoItem) // Устанавливаем новое значение в MutableStateFlow
+            _todoItem.emit(todoItem)
         }
     }
     suspend fun getTodoItemById(itemId: String): TodoItem {
