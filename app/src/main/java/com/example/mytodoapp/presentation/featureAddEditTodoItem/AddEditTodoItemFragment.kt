@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -57,9 +58,9 @@ import com.example.mytodoapp.R
 import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
-import com.example.mytodoapp.presentation.LocalMyColors
-import com.example.mytodoapp.presentation.LocalMyTypography
-import com.example.mytodoapp.presentation.AppTheme
+import com.example.mytodoapp.presentation.theme.LocalMyColors
+import com.example.mytodoapp.presentation.theme.LocalMyTypography
+import com.example.mytodoapp.presentation.theme.AppTheme
 import com.example.mytodoapp.presentation.factory.ViewModelFactory
 import com.example.mytodoapp.presentation.featureTodoList.MainTodoListFragment
 import kotlinx.coroutines.Job
@@ -81,7 +82,9 @@ class AddEditTodoItemFragment : Fragment() {
     lateinit var viewModelFactory: ViewModelFactory
     private lateinit var viewModel: TodoItemViewModel
     private var todoItemId: String = TodoItem.UNDEFINED_ID
-
+    private val datePickerHelper by lazy {
+        DatePickerHelper(requireActivity() as AppCompatActivity)
+    }
     override fun onAttach(context: Context) {
         super.onAttach(context)
         context.appComponent
@@ -122,22 +125,21 @@ class AddEditTodoItemFragment : Fragment() {
         var isSwitchOn by remember { mutableStateOf(false) }
         val isEditMode = (todoItemId != MODE_ADD)
         if (todoItemId != MODE_ADD) viewModel.getTodoItem(todoItemId)
-        var (description, setDescription) = remember { mutableStateOf("") }
-        var (creatingDate, setCreatingDate) = remember { mutableStateOf(Date(System.currentTimeMillis())) }
-        var (changeDate, setChangeDate) = remember { mutableStateOf(Date(System.currentTimeMillis())) }
-        var (id, setId) = remember { mutableStateOf(MODE_ADD) }
-        var (priority, setPriority) = remember { mutableStateOf(Importance.NORMAL) }
+        val (description, setDescription) = remember { mutableStateOf("") }
+        val (creatingDate, setCreatingDate) = remember { mutableStateOf(Date(System.currentTimeMillis())) }
+
+        val (id, setId) = remember { mutableStateOf(MODE_ADD) }
+        val (priority, setPriority) = remember { mutableStateOf(Importance.NORMAL) }
         var (deadline, setDeadline) = remember { mutableStateOf(Date.valueOf("1980-01-01")) }
         val (itemDone, setItemDone) = remember { mutableStateOf(false) }
         var expanded by remember { mutableStateOf(false) }
-        var snackbarVisible by remember { mutableStateOf(true) }
-        val coroutineScope = rememberCoroutineScope()
 
-         var deleteJob: Job? = null
+        val coroutineScope = rememberCoroutineScope()
+        var deleteJob: Job? = null
         var showUndoSnackbar by remember { mutableStateOf(false) }
         var countdown by remember { mutableStateOf(5) }
         var isDeleteInProgress by remember { mutableStateOf(false) }
-
+        var formattedDate by remember { mutableStateOf("") }
         LaunchedEffect(Unit) {
             if (isEditMode) {
                 viewModel.getTodoItem(todoItemId)
@@ -153,11 +155,15 @@ class AddEditTodoItemFragment : Fragment() {
                     setItemDone(todoItem.done)
                     setCreatingDate(todoItem.creationDate)
                     setId(todoItem.id)
-                    todoItem.deadline?.let { setDeadline(it) }
-
-
+                    todoItem.deadline?.let {
+                        setDeadline(it)
+                        formattedDate = datePickerHelper.formatDateString(it)
+                    }
                 }
             }
+        }
+        LaunchedEffect(deadline) {
+            isSwitchOn = (deadline != Date.valueOf("1980-01-01"))
         }
         val maxLength = 15
         val shortenedDescription = if (description.length > maxLength) {
@@ -325,7 +331,7 @@ class AddEditTodoItemFragment : Fragment() {
                                 )
                                 if (isSwitchOn) {
                                     Text(
-                                        text = "21.07.2023",
+                                        text = formattedDate,
                                         color = LocalMyColors.current.colorPrimary,
                                         style = LocalMyTypography.current.body2
                                     )
@@ -337,7 +343,10 @@ class AddEditTodoItemFragment : Fragment() {
                                 onCheckedChange = { isChecked ->
                                     isSwitchOn = isChecked
                                     if (isChecked) {
-                                        deadline = Date.valueOf("2023-07-21")
+                                        datePickerHelper.showDatePicker { selectedDate ->
+                                            deadline = selectedDate
+                                             formattedDate = datePickerHelper.formatDateString(selectedDate)
+                                        }
                                     } else {
                                         deadline = Date.valueOf("1980-01-01")
                                     }

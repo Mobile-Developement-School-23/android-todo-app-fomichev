@@ -1,4 +1,4 @@
-package com.example.mytodoapp.presentation
+package com.example.mytodoapp.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

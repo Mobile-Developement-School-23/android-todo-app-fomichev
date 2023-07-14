@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -48,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,12 +59,13 @@ import com.example.mytodoapp.R
 import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
-import com.example.mytodoapp.presentation.LocalMyColors
-import com.example.mytodoapp.presentation.LocalMyTypography
+import com.example.mytodoapp.presentation.theme.LocalMyColors
+import com.example.mytodoapp.presentation.theme.LocalMyTypography
 import com.example.mytodoapp.presentation.MainActivity
-import com.example.mytodoapp.presentation.AppTheme
+import com.example.mytodoapp.presentation.theme.AppTheme
 import com.example.mytodoapp.presentation.factory.ViewModelFactory
 import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment
+import com.example.mytodoapp.presentation.featureAddEditTodoItem.DatePickerHelper
 import javax.inject.Inject
 
 /**
@@ -77,7 +80,9 @@ class MainTodoListFragment : Fragment() {
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
     private lateinit var viewModel: MainViewModel
-
+    private val datePickerHelper by lazy {
+        DatePickerHelper(requireActivity() as AppCompatActivity)
+    }
     override fun onAttach(context: Context) {
         super.onAttach(context)
         context.appComponent
@@ -333,8 +338,7 @@ class MainTodoListFragment : Fragment() {
                 },
                 shape = RoundedCornerShape(8.dp),
                 backgroundColor = LocalMyColors.current.colorBackElevated,
-
-                ) {
+            ) {
                 Row(
                     modifier = Modifier.fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically
@@ -344,18 +348,17 @@ class MainTodoListFragment : Fragment() {
                         onCheckedChange = { isChecked ->
                             viewModel.changeEnableState(todoItem)
                         },
-                        modifier = Modifier.padding(start = 12.dp)
+                        modifier = Modifier
+                            .padding(start = 12.dp)
+
                     )
-
                     Spacer(modifier = Modifier.width(18.dp))
-
                     if (todoItem.priority != Importance.NORMAL) {
                         Image(
                             painter = painterResource(
                                 id = if (todoItem.priority == Importance.HIGH) {
                                     R.drawable.ic_high_priority
                                 } else R.drawable.ic_low_priority
-
                             ),
                             contentDescription = stringResource(R.string.priority),
                             modifier = Modifier
@@ -363,28 +366,28 @@ class MainTodoListFragment : Fragment() {
                                 .padding(top = 2.dp)
                         )
                     }
-
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = todoItem.description,
                             maxLines = 3,
                             overflow = TextOverflow.Ellipsis,
-                            style = LocalMyTypography.current.body2,
+                            style = if (todoItem.done) {
+                                LocalMyTypography.current.body2.copy(textDecoration = TextDecoration.LineThrough)
+                            } else {
+                                LocalMyTypography.current.body2
+                            },
                             color = LocalMyColors.current.colorPrimary,
                             modifier = Modifier.padding(start = 3.dp, bottom = 2.dp)
-
                         )
-
                         if (todoItem.deadline != null) {
                             Text(
-                                text = todoItem.deadline.toString(),
+                                text = datePickerHelper.formatDateString(todoItem.deadline!!),
                                 style = LocalMyTypography.current.body2,
                                 color = LocalMyColors.current.colorGray,
                                 modifier = Modifier.padding(start = 3.dp, top = 2.dp, bottom = 1.dp)
                             )
                         }
                     }
-
                     IconButton(
                         onClick = {
                             parentFragmentManager.beginTransaction()
