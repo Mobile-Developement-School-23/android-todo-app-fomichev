@@ -15,9 +15,16 @@
     <string name="what_need_to_do">What needs to be done…</string>
     <string name="priority">Priority</string>
     <string name="do_for">Do it before</string>
-    <string name="high_priority"><font color="#FF3B30">!! High</font></string>
-    <string name="low_priority">Low</string>
+    <string name="high_priority"><font color="#FF3B30">!! High priority</font></string>
+    <string name="low_priority">Low priority</string>
+    <string name="normal_priority">Normal priority</string>
     <string name="No">No</string>
+    <string name="normal_priority_drop">Normal priority</string>
     <string name="toast_for_empty_edit_text">Fill the field or click cancel button</string>
+    <string name="change_theme">change_theme</string>
+    <string name="light_theme">Light Theme</string>
+    <string name="dark_theme">Dark Theme</string>
+    <string name="system_theme">System Theme</string>
+    <string name="cancel_snackbar">Cancel</string>
 
 </resources>

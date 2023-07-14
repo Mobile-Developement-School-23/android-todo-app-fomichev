@@ -18,7 +18,6 @@ data class TodoItem(
 ) {
 
     companion object {
-        val NO_DEADLINE = null
         const val UNDEFINED_ID = "0"
     }
 }

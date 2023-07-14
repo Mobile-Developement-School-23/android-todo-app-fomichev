@@ -1,7 +1,6 @@
 package com.example.mytodoapp.presentation.featureAddEditTodoItem
 
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +15,9 @@ import com.example.mytodoapp.domain.usecases.DeleteTodoItemUseCase
 import com.example.mytodoapp.domain.usecases.EditTodoItemUseCase
 import com.example.mytodoapp.domain.usecases.GetTodoItemUseCase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.sql.Date
 import javax.inject.Inject
@@ -44,21 +46,20 @@ class TodoItemViewModel @Inject constructor(
     private val editTodoItemUseCase: EditTodoItemUseCase,
     private val deleteShopItemUseCase: DeleteTodoItemUseCase
 ) : ViewModel() {
-
+    private val _todoItem = MutableStateFlow<TodoItem?>(null)
+    val todoItem: StateFlow<TodoItem?> = _todoItem
     private val _errorInputName = MutableLiveData<Boolean>()
-    private val _todoItem = MutableLiveData<TodoItem>()
-    val todoItem: LiveData<TodoItem>
-        get() = _todoItem
-
     fun getTodoItem(todoItemId: String) {
         viewModelScope.launch {
-            val item = getTodoItemUseCase.getTodoItem(todoItemId)
-            _todoItem.value = item
+            val todoItem = getTodoItemUseCase.getTodoItem(todoItemId)
+            _todoItem.emit(todoItem)
         }
     }
 
-    fun addTodoItem(inputDescription: String?, priority: Importance, done: Boolean,
-        creatingDate: Date, changeDate: Date?, deadline: Date?, id: String) {
+    fun addTodoItem(
+        inputDescription: String?, priority: Importance, done: Boolean,
+        creatingDate: Date, changeDate: Date?, deadline: Date?, id: String
+    ) {
         val description = parseName(inputDescription)
         val fieldsValid = validateInput(description)
         if (fieldsValid) {
@@ -72,16 +73,16 @@ class TodoItemViewModel @Inject constructor(
         }
     }
 
-    fun deleteTodoItem(todoItem: TodoItem) {
-        viewModelScope.launch(Dispatchers.IO) {
-            deleteShopItemUseCase.deleteTodoItem(todoItem)
-            if (connection.isOnline()) deleteNetworkItem(todoItem.id)
-            else sharedPreferencesHelper.isNotOnline = true
-        }
+    fun deleteTodoItem(todoItem: TodoItem): Job = viewModelScope.launch(Dispatchers.IO) {
+        deleteShopItemUseCase.deleteTodoItem(todoItem)
+        if (connection.isOnline()) deleteNetworkItem(todoItem.id)
+        else sharedPreferencesHelper.isNotOnline = true
     }
 
-    fun editTodoItem(inputDescription: String?, priority: Importance, done: Boolean,
-        creatingDate: Date, changeDate: Date?, deadline: Date?, id: String) {
+    fun editTodoItem(
+        inputDescription: String?, priority: Importance, done: Boolean,
+        creatingDate: Date, changeDate: Date?, deadline: Date?, id: String
+    ) {
         val description = parseName(inputDescription)
         val fieldsValid = validateInput(description)
         if (fieldsValid) {
@@ -93,10 +94,12 @@ class TodoItemViewModel @Inject constructor(
                         done = done,
                         changeDate = changeDate,
                         deadline = deadline,
-                        id = id)
+                        id = id
+                    )
                     editTodoItemUseCase.editTodoItem(item)
                     if (connection.isOnline()) updateNetworkItem(item)
-                    else sharedPreferencesHelper.isNotOnline = true }
+                    else sharedPreferencesHelper.isNotOnline = true
+                }
             }
         }
     }

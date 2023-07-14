@@ -2,6 +2,7 @@ package com.example.mytodoapp.presentation
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatDelegate
 import com.example.mytodoapp.App
 import com.example.mytodoapp.R
 import com.example.mytodoapp.databinding.ActivityMainBinding
@@ -29,5 +30,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         supportFragmentManager.beginTransaction()
             .replace(R.id.rootContainer, MainTodoListFragment.newInstance()).commit()
+    }
+
+    fun updateAppTheme(themeMode: Int) {
+        AppCompatDelegate.setDefaultNightMode(themeMode)
+        delegate.applyDayNight()
     }
 }
