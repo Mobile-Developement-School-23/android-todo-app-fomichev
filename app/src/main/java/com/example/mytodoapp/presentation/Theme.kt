@@ -1,6 +1,5 @@
 package com.example.mytodoapp.presentation
 
-import android.webkit.WebSettings.TextSize
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Typography
 import androidx.compose.runtime.Composable
@@ -8,14 +7,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 
 
 @Composable
-fun MainTheme(
+fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
@@ -55,7 +51,8 @@ fun MainTheme(
 
     CompositionLocalProvider(
         LocalMyColors provides colors,
-       LocalMyTypography provides typography,
+        LocalMyTypography provides typography,
         content = content
     )
 }
+

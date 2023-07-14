@@ -26,14 +26,15 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Snackbar
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -41,6 +42,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,12 +57,14 @@ import com.example.mytodoapp.R
 import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
-import com.example.mytodoapp.domain.TodoItem.Companion.UNDEFINED_ID
 import com.example.mytodoapp.presentation.LocalMyColors
 import com.example.mytodoapp.presentation.LocalMyTypography
-import com.example.mytodoapp.presentation.MainTheme
+import com.example.mytodoapp.presentation.AppTheme
 import com.example.mytodoapp.presentation.factory.ViewModelFactory
 import com.example.mytodoapp.presentation.featureTodoList.MainTodoListFragment
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.sql.Date
 import java.util.UUID
 import javax.inject.Inject
@@ -103,7 +107,7 @@ class AddEditTodoItemFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                MainTheme() {
+                AppTheme() {
                     AddEditTodoItemScreen()
                 }
             }
@@ -127,11 +131,19 @@ class AddEditTodoItemFragment : Fragment() {
         val (itemDone, setItemDone) = remember { mutableStateOf(false) }
         var expanded by remember { mutableStateOf(false) }
 
+        val coroutineScope = rememberCoroutineScope()
+
+         var deleteJob: Job? = null
+        var showUndoSnackbar by remember { mutableStateOf(false) }
+        var countdown by remember { mutableStateOf(5) }
+        var isDeleteInProgress by remember { mutableStateOf(false) }
+
         LaunchedEffect(Unit) {
             if (isEditMode) {
                 viewModel.getTodoItem(todoItemId)
             }
         }
+
 
         LaunchedEffect(viewModel.todoItem) {
             viewModel.todoItem.collect { todoItem ->
@@ -143,6 +155,40 @@ class AddEditTodoItemFragment : Fragment() {
                     setId(todoItem.id)
                     todoItem.deadline?.let { setDeadline(it) }
 
+                }
+            }
+        }
+
+        fun cancelDelete() {
+            isDeleteInProgress = false
+            showUndoSnackbar = false
+        }
+
+        fun deleteTodoItem() {
+            viewModel.getTodoItem(todoItemId)
+            val todoDelete = viewModel.todoItem.value
+
+            deleteJob?.cancel()
+            deleteJob = coroutineScope.launch {
+                showUndoSnackbar = true
+                countdown = 5
+                isDeleteInProgress = true
+
+                repeat(5) {
+                    delay(1000)
+                    countdown--
+                    if (!isDeleteInProgress) {
+                        return@launch
+                    }
+                }
+
+                if (isDeleteInProgress) {
+                    viewModel.deleteTodoItem(todoDelete!!)
+                    isDeleteInProgress = false
+                    requireActivity().supportFragmentManager.beginTransaction()
+                        .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
+                        .addToBackStack(null)
+                        .commit()
                 }
             }
         }
@@ -185,157 +231,177 @@ class AddEditTodoItemFragment : Fragment() {
                                 text = stringResource(id = R.string.save),
                                 style = LocalMyTypography.current.body2,
                                 color = LocalMyColors.current.colorBlue,
-                                        modifier = Modifier.padding(end = 8.dp)
+                                modifier = Modifier.padding(end = 8.dp)
                             )
                         }
                     }
                 )
             },
             content = {
-                Box(modifier = Modifier
-                .fillMaxSize()
-                .background(color = LocalMyColors.current.colorBackPrimary))
-            {
-                Column(
+                Box(
                     modifier = Modifier
-                        .padding(16.dp)
                         .fillMaxSize()
-                ) {
-                    Card(
+                        .background(color = LocalMyColors.current.colorBackPrimary)
+                )
+                {
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp),
-                        backgroundColor = LocalMyColors.current.colorBackSecondary,
-                        shape = RoundedCornerShape(8.dp),
-                        elevation = 4.dp
+                            .padding(16.dp)
+                            .fillMaxSize()
                     ) {
-                        TextField(
+                        Card(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(8.dp),
-                            value = description,
-                            onValueChange = { setDescription(it) },
-                            textStyle = LocalTextStyle.current.copy(
-                                color = LocalMyColors.current.colorPrimary
-                            ),
-                            singleLine = false,
-                            maxLines = Int.MAX_VALUE,
-                            colors = TextFieldDefaults.textFieldColors(
-                                backgroundColor = LocalMyColors.current.colorBackSecondary,
-                                cursorColor = MaterialTheme.colors.onSurface,
-                                focusedIndicatorColor = LocalMyColors.current.colorBackSecondary,
-                                unfocusedIndicatorColor = Color.Transparent
-                            )
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-
-                    Column {
-                        Text(
-                            text = when (priority) {
-                                Importance.LOW -> stringResource(id = R.string.low_priority)
-                                Importance.HIGH -> stringResource(id = R.string.high_priority)
-                                else -> stringResource(id = R.string.normal_priority)
-                            },
-                            color = LocalMyColors.current.colorPrimary,
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .clickable { expanded = true}
-                        )
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
+                                .fillMaxWidth()
+                                .height(100.dp),
+                            backgroundColor = LocalMyColors.current.colorBackSecondary,
+                            shape = RoundedCornerShape(8.dp),
+                            elevation = 4.dp
                         ) {
-                            PriorityItems(
-                                priority = priority,
-                                onPrioritySelected = {
-                                    setPriority(it)
-                                    expanded = false
-                                }
+                            TextField(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(8.dp),
+                                value = description,
+                                onValueChange = { setDescription(it) },
+                                textStyle = LocalTextStyle.current.copy(
+                                    color = LocalMyColors.current.colorPrimary
+                                ),
+                                singleLine = false,
+                                maxLines = Int.MAX_VALUE,
+                                colors = TextFieldDefaults.textFieldColors(
+                                    backgroundColor = LocalMyColors.current.colorBackSecondary,
+                                    cursorColor = MaterialTheme.colors.onSurface,
+                                    focusedIndicatorColor = LocalMyColors.current.colorBackSecondary,
+                                    unfocusedIndicatorColor = Color.Transparent
+                                )
                             )
                         }
-                    }
+
+                        Spacer(modifier = Modifier.height(16.dp))
 
 
-
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(0.3f)
-                        ) {
+                        Column {
                             Text(
-                                text = stringResource(id = R.string.do_for),
+                                text = when (priority) {
+                                    Importance.LOW -> stringResource(id = R.string.low_priority)
+                                    Importance.HIGH -> stringResource(id = R.string.high_priority)
+                                    else -> stringResource(id = R.string.normal_priority)
+                                },
                                 color = LocalMyColors.current.colorPrimary,
-                                style = LocalMyTypography.current.body2
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .clickable { expanded = true }
                             )
-                            if (isSwitchOn) {
-                                Text(
-                                    text = "21.07.2023",
-                                    color = LocalMyColors.current.colorPrimary,
-                                    style = LocalMyTypography.current.body2
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                PriorityItems(
+                                    priority = priority,
+                                    onPrioritySelected = {
+                                        setPriority(it)
+                                        expanded = false
+                                    }
                                 )
                             }
                         }
 
-                        Switch(
-                            checked = isSwitchOn,
-                            onCheckedChange = { isChecked ->
-                                isSwitchOn = isChecked
-                                if (isChecked) {
-                                    deadline = Date.valueOf("2023-07-21")
-                                } else {
-                                    deadline = Date.valueOf("1980-01-01")
-                                }
-                            },
-                            modifier = Modifier.padding(start = 16.dp)
-                        )
-                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        IconButton(
-                            onClick = {
-                                if (isEditMode) deleteTodoItem()
-                                requireActivity().supportFragmentManager.beginTransaction()
-                                    .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
-                                    .addToBackStack(null)
-                                    .commit()
-                            }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = stringResource(id = R.string.delete),
-                                tint = MaterialTheme.colors.error
+                            Column(
+                                modifier = Modifier.weight(0.3f)
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.do_for),
+                                    color = LocalMyColors.current.colorPrimary,
+                                    style = LocalMyTypography.current.body2
+                                )
+                                if (isSwitchOn) {
+                                    Text(
+                                        text = "21.07.2023",
+                                        color = LocalMyColors.current.colorPrimary,
+                                        style = LocalMyTypography.current.body2
+                                    )
+                                }
+                            }
+
+                            Switch(
+                                checked = isSwitchOn,
+                                onCheckedChange = { isChecked ->
+                                    isSwitchOn = isChecked
+                                    if (isChecked) {
+                                        deadline = Date.valueOf("2023-07-21")
+                                    } else {
+                                        deadline = Date.valueOf("1980-01-01")
+                                    }
+                                },
+                                modifier = Modifier.padding(start = 16.dp)
                             )
                         }
 
-                        Text(
-                            text = stringResource(id = R.string.delete),
-                            style = LocalMyTypography.current.subtitle1,
-                            color = LocalMyColors.current.colorRed,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    if (isEditMode) deleteTodoItem()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = stringResource(id = R.string.delete),
+                                    tint = MaterialTheme.colors.error
+                                )
+                            }
+
+                            Text(
+                                text = stringResource(id = R.string.delete),
+                                style = LocalMyTypography.current.subtitle1,
+                                color = LocalMyColors.current.colorRed,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                            if (showUndoSnackbar) {
+                                Snackbar(
+                                    modifier = Modifier.padding(16.dp),
+                                    action = {
+                                        TextButton(onClick = { cancelDelete() }) {
+                                            Text(text = "Отменить")
+                                        }
+                                    }
+                                ) {
+                                    Text(
+                                        text = "Удалить Имя_Дела",
+                                        style = MaterialTheme.typography.subtitle1
+                                    )
+                                    Text(
+                                        text = countdown.toString(),
+                                        style = MaterialTheme.typography.body1
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
-            }
+
         )
     }
+
+
     @Preview("Light Theme", showBackground = true)
     @Composable
     fun AddEditTodoItemScreenLightPreview() {
-        MainTheme {
+        AppTheme {
             AddEditTodoItemScreen()
 
         }
@@ -344,20 +410,20 @@ class AddEditTodoItemFragment : Fragment() {
     @Preview("Dark Theme", showBackground = true)
     @Composable
     fun AddEditTodoItemScreenDarkPreview() {
-        MainTheme(darkTheme = true) {
+        AppTheme(darkTheme = true) {
             AddEditTodoItemScreen()
         }
     }
 
-    private fun deleteTodoItem() {
-        viewModel.getTodoItem(todoItemId)
-        val todoDelete = viewModel.todoItem.value
-        viewModel.deleteTodoItem(todoDelete!!)
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
-            .addToBackStack(null)
-            .commit()
-    }
+//    private fun deleteTodoItem() {
+//        viewModel.getTodoItem(todoItemId)
+//        val todoDelete = viewModel.todoItem.value
+//        viewModel.deleteTodoItem(todoDelete!!)
+//        requireActivity().supportFragmentManager.beginTransaction()
+//            .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
+//            .addToBackStack(null)
+//            .commit()
+//    }
 
     private fun editTodoItem(
         description: String?,
@@ -458,7 +524,7 @@ fun PriorityItems(
         ) {
             Text(
                 text = itemText,
-                style = MaterialTheme.typography.body1
+                style = LocalMyTypography.current.body2
             )
         }
     }

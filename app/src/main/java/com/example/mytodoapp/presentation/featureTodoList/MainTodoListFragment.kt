@@ -32,7 +32,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
@@ -56,16 +55,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.mytodoapp.R
 import com.example.mytodoapp.appComponent
-import com.example.mytodoapp.data.SharedPreferencesHelper
-import com.example.mytodoapp.data.TodoListRepositoryImpl
-import com.example.mytodoapp.data.network.CheckConnection
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
-import com.example.mytodoapp.domain.usecases.EditTodoItemUseCase
 import com.example.mytodoapp.presentation.LocalMyColors
 import com.example.mytodoapp.presentation.LocalMyTypography
 import com.example.mytodoapp.presentation.MainActivity
-import com.example.mytodoapp.presentation.MainTheme
+import com.example.mytodoapp.presentation.AppTheme
 import com.example.mytodoapp.presentation.factory.ViewModelFactory
 import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment
 import javax.inject.Inject
@@ -91,16 +86,17 @@ class MainTodoListFragment : Fragment() {
             .inject(this)
     }
 
+    @SuppressLint("SuspiciousIndentation")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         viewModel =
-            ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
-        viewModel.initLifecycleOwner(viewLifecycleOwner)
+            ViewModelProvider(requireActivity(), viewModelFactory)[MainViewModel::class.java]
+                 viewModel.initLifecycleOwner(viewLifecycleOwner)
         return ComposeView(requireContext()).apply {
             setContent {
-                MainTheme() {
+                AppTheme() {
                     MainTodoListScreen(viewModel)
                 }
 
@@ -118,7 +114,7 @@ class MainTodoListFragment : Fragment() {
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
     @Composable
-    fun MainTodoListScreen(viewModel: MainViewModel) { MainTheme(){
+    fun MainTodoListScreen(viewModel: MainViewModel) { AppTheme(){
         val todoItems by viewModel.data.collectAsState(mutableListOf())
         val doneTodoCount by viewModel.doneTodoCount.collectAsState()
         val showThemeMenu = remember { mutableStateOf(false) }
@@ -244,7 +240,7 @@ class MainTodoListFragment : Fragment() {
     @Preview("Light Theme", showBackground = true)
     @Composable
     fun MainTodoListScreenLightPreview() {
-        MainTheme {
+        AppTheme {
             MainTodoListScreen(viewModel = viewModel)
         }
     }
@@ -252,7 +248,7 @@ class MainTodoListFragment : Fragment() {
     @Preview("Dark Theme", showBackground = true)
     @Composable
     fun MainTodoListScreenDarkPreview() {
-        MainTheme(darkTheme = true) {
+        AppTheme(darkTheme = true) {
             MainTodoListScreen(viewModel = viewModel)
         }
     }
@@ -297,7 +293,7 @@ class MainTodoListFragment : Fragment() {
 
     @Composable
     fun TodoList(todoItems: MutableList<TodoItem>, viewModel: MainViewModel) {
-        MainTheme() {
+        AppTheme() {
             val filteredItems = if (viewModel.showDoneItems) {
                 todoItems.sortedBy { it.creationDate }
             } else {
@@ -316,7 +312,7 @@ class MainTodoListFragment : Fragment() {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     fun TodoItemRow(todoItem: TodoItem) {
-        MainTheme() {
+        AppTheme() {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()

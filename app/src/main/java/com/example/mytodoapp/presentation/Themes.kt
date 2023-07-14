@@ -1,11 +1,7 @@
 package com.example.mytodoapp.presentation
 
-import android.webkit.WebSettings.TextSize
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.TextUnit
-import java.time.format.TextStyle
 
 data class MyColors(
     val colorSupportSeparator: Color,
@@ -24,9 +20,6 @@ data class MyColors(
     val colorBackSecondary: Color,
     val colorBackElevated: Color
 )
-
-
-
 
 
 val LocalMyColors = staticCompositionLocalOf<MyColors> {

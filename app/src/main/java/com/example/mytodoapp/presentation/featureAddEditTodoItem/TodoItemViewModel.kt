@@ -17,6 +17,7 @@ import com.example.mytodoapp.domain.usecases.DeleteTodoItemUseCase
 import com.example.mytodoapp.domain.usecases.EditTodoItemUseCase
 import com.example.mytodoapp.domain.usecases.GetTodoItemUseCase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -78,12 +79,10 @@ class TodoItemViewModel @Inject constructor(
         }
     }
 
-    fun deleteTodoItem(todoItem: TodoItem) {
-        viewModelScope.launch(Dispatchers.IO) {
-            deleteShopItemUseCase.deleteTodoItem(todoItem)
-            if (connection.isOnline()) deleteNetworkItem(todoItem.id)
-            else sharedPreferencesHelper.isNotOnline = true
-        }
+    fun deleteTodoItem(todoItem: TodoItem): Job = viewModelScope.launch(Dispatchers.IO) {
+        deleteShopItemUseCase.deleteTodoItem(todoItem)
+        if (connection.isOnline()) deleteNetworkItem(todoItem.id)
+        else sharedPreferencesHelper.isNotOnline = true
     }
 
     fun editTodoItem(inputDescription: String?, priority: Importance, done: Boolean,
