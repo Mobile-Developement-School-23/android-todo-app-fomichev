@@ -1,9 +1,7 @@
 package com.example.mytodoapp.presentation.featureAddEditTodoItem
 
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mytodoapp.data.SharedPreferencesHelper
@@ -57,15 +55,11 @@ class TodoItemViewModel @Inject constructor(
             _todoItem.emit(todoItem)
         }
     }
-    suspend fun getTodoItemById(itemId: String): TodoItem {
-        return getTodoItemUseCase.getTodoItem(itemId)
-    }
 
-
-
-
-    fun addTodoItem(inputDescription: String?, priority: Importance, done: Boolean,
-        creatingDate: Date, changeDate: Date?, deadline: Date?, id: String) {
+    fun addTodoItem(
+        inputDescription: String?, priority: Importance, done: Boolean,
+        creatingDate: Date, changeDate: Date?, deadline: Date?, id: String
+    ) {
         val description = parseName(inputDescription)
         val fieldsValid = validateInput(description)
         if (fieldsValid) {
@@ -85,8 +79,10 @@ class TodoItemViewModel @Inject constructor(
         else sharedPreferencesHelper.isNotOnline = true
     }
 
-    fun editTodoItem(inputDescription: String?, priority: Importance, done: Boolean,
-        creatingDate: Date, changeDate: Date?, deadline: Date?, id: String) {
+    fun editTodoItem(
+        inputDescription: String?, priority: Importance, done: Boolean,
+        creatingDate: Date, changeDate: Date?, deadline: Date?, id: String
+    ) {
         val description = parseName(inputDescription)
         val fieldsValid = validateInput(description)
         if (fieldsValid) {
@@ -98,10 +94,12 @@ class TodoItemViewModel @Inject constructor(
                         done = done,
                         changeDate = changeDate,
                         deadline = deadline,
-                        id = id)
+                        id = id
+                    )
                     editTodoItemUseCase.editTodoItem(item)
                     if (connection.isOnline()) updateNetworkItem(item)
-                    else sharedPreferencesHelper.isNotOnline = true }
+                    else sharedPreferencesHelper.isNotOnline = true
+                }
             }
         }
     }

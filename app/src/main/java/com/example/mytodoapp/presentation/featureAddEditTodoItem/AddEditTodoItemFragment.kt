@@ -58,11 +58,11 @@ import com.example.mytodoapp.R
 import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
-import com.example.mytodoapp.presentation.theme.LocalMyColors
-import com.example.mytodoapp.presentation.theme.LocalMyTypography
-import com.example.mytodoapp.presentation.theme.AppTheme
 import com.example.mytodoapp.presentation.factory.ViewModelFactory
 import com.example.mytodoapp.presentation.featureTodoList.MainTodoListFragment
+import com.example.mytodoapp.presentation.theme.AppTheme
+import com.example.mytodoapp.presentation.theme.LocalMyColors
+import com.example.mytodoapp.presentation.theme.LocalMyTypography
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -85,6 +85,7 @@ class AddEditTodoItemFragment : Fragment() {
     private val datePickerHelper by lazy {
         DatePickerHelper(requireActivity() as AppCompatActivity)
     }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         context.appComponent
@@ -115,37 +116,33 @@ class AddEditTodoItemFragment : Fragment() {
                 }
             }
         }
-
     }
-
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SuspiciousIndentation")
     @Composable
     fun AddEditTodoItemScreen() {
-        var isSwitchOn by remember { mutableStateOf(false) }
         val isEditMode = (todoItemId != MODE_ADD)
         if (todoItemId != MODE_ADD) viewModel.getTodoItem(todoItemId)
         val (description, setDescription) = remember { mutableStateOf("") }
         val (creatingDate, setCreatingDate) = remember { mutableStateOf(Date(System.currentTimeMillis())) }
-
+        var isSwitchOn by remember { mutableStateOf(false) }
         val (id, setId) = remember { mutableStateOf(MODE_ADD) }
         val (priority, setPriority) = remember { mutableStateOf(Importance.NORMAL) }
-        var (deadline, setDeadline) = remember { mutableStateOf(Date.valueOf("1980-01-01")) }
+        var (deadline, setDeadline) = remember { mutableStateOf(Date.valueOf(NO_DEADLINE)) }
         val (itemDone, setItemDone) = remember { mutableStateOf(false) }
         var expanded by remember { mutableStateOf(false) }
-
         val coroutineScope = rememberCoroutineScope()
         var deleteJob: Job? = null
         var showUndoSnackbar by remember { mutableStateOf(false) }
         var countdown by remember { mutableStateOf(5) }
         var isDeleteInProgress by remember { mutableStateOf(false) }
         var formattedDate by remember { mutableStateOf("") }
+
         LaunchedEffect(Unit) {
             if (isEditMode) {
                 viewModel.getTodoItem(todoItemId)
             }
         }
-
 
         LaunchedEffect(viewModel.todoItem) {
             viewModel.todoItem.collect { todoItem ->
@@ -163,7 +160,7 @@ class AddEditTodoItemFragment : Fragment() {
             }
         }
         LaunchedEffect(deadline) {
-            isSwitchOn = (deadline != Date.valueOf("1980-01-01"))
+            isSwitchOn = (deadline != Date.valueOf(NO_DEADLINE))
         }
         val maxLength = 15
         val shortenedDescription = if (description.length > maxLength) {
@@ -171,6 +168,7 @@ class AddEditTodoItemFragment : Fragment() {
         } else {
             description
         }
+
         fun cancelDelete() {
             isDeleteInProgress = false
             showUndoSnackbar = false
@@ -202,7 +200,6 @@ class AddEditTodoItemFragment : Fragment() {
             }
         }
 
-
         val scaffoldState = rememberScaffoldState()
         Scaffold(
             scaffoldState = scaffoldState,
@@ -223,14 +220,8 @@ class AddEditTodoItemFragment : Fragment() {
                     },
                     actions = {
                         IconButton(onClick = {
-                            if (isEditMode) editTodoItem(
-                                description,
-                                priority,
-                                itemDone,
-                                deadline,
-                                creatingDate,
-                                id
-                            )
+                            if (isEditMode) editTodoItem(description, priority, itemDone,
+                                deadline, creatingDate, id)
                             else saveTodoItem(description, priority, false, deadline)
                         }) {
                             Text(
@@ -312,9 +303,6 @@ class AddEditTodoItemFragment : Fragment() {
                             }
                         }
 
-
-
-
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Row(
@@ -345,10 +333,11 @@ class AddEditTodoItemFragment : Fragment() {
                                     if (isChecked) {
                                         datePickerHelper.showDatePicker { selectedDate ->
                                             deadline = selectedDate
-                                             formattedDate = datePickerHelper.formatDateString(selectedDate)
+                                            formattedDate =
+                                                datePickerHelper.formatDateString(selectedDate)
                                         }
                                     } else {
-                                        deadline = Date.valueOf("1980-01-01")
+                                        deadline = Date.valueOf(NO_DEADLINE)
                                     }
                                 },
                                 modifier = Modifier.padding(start = 16.dp)
@@ -384,7 +373,10 @@ class AddEditTodoItemFragment : Fragment() {
                                     modifier = Modifier.padding(16.dp),
                                     action = {
                                         TextButton(onClick = { cancelDelete() }) {
-                                            Text(text = stringResource(R.string.cancel_snackbar), color = LocalMyColors.current.colorRed)
+                                            Text(
+                                                text = stringResource(R.string.cancel_snackbar),
+                                                color = LocalMyColors.current.colorRed
+                                            )
                                         }
                                     },
                                     backgroundColor = LocalMyColors.current.colorGray
@@ -402,9 +394,9 @@ class AddEditTodoItemFragment : Fragment() {
                                             text = countdown.toString(),
                                             style = LocalMyTypography.current.body1,
                                             color = LocalMyColors.current.colorWhite,
-                                                    modifier = Modifier
-                                                        .padding(vertical = 4.dp)
-                                                        .padding(start = 18.dp)
+                                            modifier = Modifier
+                                                .padding(vertical = 4.dp)
+                                                .padding(start = 18.dp)
                                         )
                                     }
                                 }
@@ -413,7 +405,6 @@ class AddEditTodoItemFragment : Fragment() {
                     }
                 }
             }
-
         )
     }
 
@@ -443,75 +434,47 @@ class AddEditTodoItemFragment : Fragment() {
                 R.anim.fade_in,
                 R.anim.slide_out_to_right
             )
-            .replace(
-                R.id.rootContainer,
-                MainTodoListFragment.newInstance()
-            )
+            .replace(R.id.rootContainer, MainTodoListFragment.newInstance())
             .addToBackStack(null)
             .commit()
     }
 
-    private fun editTodoItem(
-        description: String?,
-        priority: Importance,
-        itemDone: Boolean,
-        deadline: Date?,
-        creatingDate: Date,
-        id: String
-    ) {
+    private fun editTodoItem(description: String?, priority: Importance, itemDone: Boolean,
+                             deadline: Date?, creatingDate: Date, id: String) {
         val inputDescription = description?.trim()
         val priority = priority
         val done = itemDone
         val creatingDate = creatingDate
         val changeDate = Date(System.currentTimeMillis())
-        val deadline = if (deadline == Date.valueOf("1980-01-01")) null else deadline
+        val deadline = if (deadline == Date.valueOf(NO_DEADLINE)) null else deadline
         val id = id
 
-        viewModel.editTodoItem(
-            inputDescription,
-            priority,
-            done,
-            creatingDate,
-            changeDate,
-            deadline,
-            id
-        )
+        viewModel.editTodoItem(inputDescription, priority, done, creatingDate, changeDate,
+            deadline, id)
         openMainFrag()
     }
 
 
-    private fun saveTodoItem(
-        description: String?,
-        priority: Importance,
-        itemDone: Boolean,
-        deadline: Date?,
-        id: String = MODE_ADD
-    ) {
+    private fun saveTodoItem(description: String?, priority: Importance, itemDone: Boolean,
+        deadline: Date?, id: String = MODE_ADD) {
         val inputDescription = description?.trim()
         val priority = priority
         val done = itemDone
         val creatingDate = Date(System.currentTimeMillis())
         val changeDate = Date(System.currentTimeMillis())
-        val deadline = if (deadline == Date.valueOf("1980-01-01")) null else deadline
+        val deadline = if (deadline == Date.valueOf(NO_DEADLINE)) null else deadline
         val id = UUID.randomUUID().toString()
 
-        viewModel.addTodoItem(
-            inputDescription,
-            priority,
-            done,
-            creatingDate,
-            changeDate,
-            deadline,
-            id
-        )
+        viewModel.addTodoItem(inputDescription, priority, done, creatingDate, changeDate,
+            deadline, id)
         openMainFrag()
     }
-
 
 
     companion object {
         const val MODE_ADD = "-1"
         private const val ARG_PARAM1 = "param1"
+        const val NO_DEADLINE = "1980-01-01"
 
         @JvmStatic
         fun newInstance(param1: String?) = AddEditTodoItemFragment().apply {
@@ -524,31 +487,28 @@ class AddEditTodoItemFragment : Fragment() {
     }
 
 
+    @Composable
+    fun PriorityItems(
+        priority: Importance,
+        onPrioritySelected: (Importance) -> Unit
+    ) {
+        val priorityItems = listOf(
+            Pair(Importance.LOW, stringResource(id = R.string.low_priority)),
+            Pair(Importance.NORMAL, stringResource(id = R.string.normal_priority)),
+            Pair(Importance.HIGH, stringResource(id = R.string.high_priority))
+        )
 
-
-
-@Composable
-fun PriorityItems(
-    priority: Importance,
-    onPrioritySelected: (Importance) -> Unit
-) {
-    val priorityItems = listOf(
-        Pair(Importance.LOW, stringResource(id = R.string.low_priority)),
-        Pair(Importance.NORMAL, stringResource(id = R.string.normal_priority)),
-        Pair(Importance.HIGH, stringResource(id = R.string.high_priority))
-    )
-
-    priorityItems.forEach { (itemPriority, itemText) ->
-        DropdownMenuItem(
-            onClick = { onPrioritySelected(itemPriority) }
-        ) {
-            Text(
-                text = itemText,
-                style = LocalMyTypography.current.body2
-            )
+        priorityItems.forEach { (itemPriority, itemText) ->
+            DropdownMenuItem(
+                onClick = { onPrioritySelected(itemPriority) }
+            ) {
+                Text(
+                    text = itemText,
+                    style = LocalMyTypography.current.body2
+                )
+            }
         }
     }
-}
 }
 
 

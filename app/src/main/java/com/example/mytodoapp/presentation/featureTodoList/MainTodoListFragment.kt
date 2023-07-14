@@ -59,13 +59,13 @@ import com.example.mytodoapp.R
 import com.example.mytodoapp.appComponent
 import com.example.mytodoapp.domain.Importance
 import com.example.mytodoapp.domain.TodoItem
-import com.example.mytodoapp.presentation.theme.LocalMyColors
-import com.example.mytodoapp.presentation.theme.LocalMyTypography
 import com.example.mytodoapp.presentation.MainActivity
-import com.example.mytodoapp.presentation.theme.AppTheme
 import com.example.mytodoapp.presentation.factory.ViewModelFactory
 import com.example.mytodoapp.presentation.featureAddEditTodoItem.AddEditTodoItemFragment
 import com.example.mytodoapp.presentation.featureAddEditTodoItem.DatePickerHelper
+import com.example.mytodoapp.presentation.theme.AppTheme
+import com.example.mytodoapp.presentation.theme.LocalMyColors
+import com.example.mytodoapp.presentation.theme.LocalMyTypography
 import javax.inject.Inject
 
 /**
@@ -83,6 +83,7 @@ class MainTodoListFragment : Fragment() {
     private val datePickerHelper by lazy {
         DatePickerHelper(requireActivity() as AppCompatActivity)
     }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         context.appComponent
@@ -98,157 +99,137 @@ class MainTodoListFragment : Fragment() {
     ): View {
         viewModel =
             ViewModelProvider(requireActivity(), viewModelFactory)[MainViewModel::class.java]
-                 viewModel.initLifecycleOwner(viewLifecycleOwner)
+        viewModel.initLifecycleOwner(viewLifecycleOwner)
         return ComposeView(requireContext()).apply {
             setContent {
                 AppTheme() {
                     MainTodoListScreen(viewModel)
                 }
-
             }
         }
     }
 
-
     companion object {
-
         @JvmStatic
         fun newInstance() = MainTodoListFragment()
     }
 
-
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
     @Composable
-    fun MainTodoListScreen(viewModel: MainViewModel) { AppTheme(){
-        val todoItems by viewModel.data.collectAsState(mutableListOf())
-        val doneTodoCount by viewModel.doneTodoCount.collectAsState()
-        val showThemeMenu = remember { mutableStateOf(false) }
-        val selectedThemeMode = remember { mutableStateOf(AppCompatDelegate.MODE_NIGHT_NO) }
+    fun MainTodoListScreen(viewModel: MainViewModel) {
+        AppTheme() {
+            val todoItems by viewModel.data.collectAsState(mutableListOf())
+            val doneTodoCount by viewModel.doneTodoCount.collectAsState()
+            val showThemeMenu = remember { mutableStateOf(false) }
+            val selectedThemeMode = remember { mutableStateOf(AppCompatDelegate.MODE_NIGHT_NO) }
 
-        if (showThemeMenu.value) {
-            ThemeMenuPopup(
-                onCloseMenu = { showThemeMenu.value = false },
-                onThemeSelected = { themeMode ->
-                    selectedThemeMode.value = themeMode
-                    showThemeMenu.value = false
-                    val act = requireActivity() as MainActivity
-                    act.updateAppTheme(selectedThemeMode.value)
-                }
-            )
-        }
+            if (showThemeMenu.value) {
+                ThemeMenuPopup(
+                    onCloseMenu = { showThemeMenu.value = false },
+                    onThemeSelected = { themeMode ->
+                        selectedThemeMode.value = themeMode
+                        showThemeMenu.value = false
+                        val act = requireActivity() as MainActivity
+                        act.updateAppTheme(selectedThemeMode.value)
+                    }
+                )
+            }
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    backgroundColor = LocalMyColors.current.colorBackPrimary,
-                    modifier = Modifier.height(165.dp)
-                ) {
-                    Box(
-                        Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.BottomStart
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        backgroundColor = LocalMyColors.current.colorBackPrimary,
+                        modifier = Modifier.height(165.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(start = 58.dp, bottom = 20.dp),
-                            verticalArrangement = Arrangement.Bottom
+                        Box(
+                            Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.BottomStart
                         ) {
-                            Text(
-                                text = stringResource(R.string.my_todo_items),
-                                style = LocalMyTypography.current.h1,
-                                color = LocalMyColors.current.colorPrimary
+                            Column(
+                                modifier = Modifier.padding(start = 58.dp, bottom = 20.dp),
+                                verticalArrangement = Arrangement.Bottom
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.my_todo_items),
+                                    style = LocalMyTypography.current.h1,
+                                    color = LocalMyColors.current.colorPrimary
+                                )
+                                Text(
+                                    text = "${stringResource(R.string.number_of_done_todo)} $doneTodoCount",
+                                    style = LocalMyTypography.current.subtitle1,
+                                    color = LocalMyColors.current.colorTertiary,
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
+                            Column(
+                                modifier = Modifier.align(Alignment.BottomEnd)
                             )
-                            Text(
-                                text = "${stringResource(R.string.number_of_done_todo)} $doneTodoCount",
-                                style = LocalMyTypography.current.subtitle1,
-                                color = LocalMyColors.current.colorTertiary,
-                                modifier = Modifier.padding(top = 8.dp)
-                            )
-                        }
-                        Column(
-                            modifier = Modifier.align(Alignment.BottomEnd)
-                        )
-                        {
+                            {
 
-                            IconButton(
-                                onClick = { viewModel.changeMode() },
+                                IconButton(
+                                    onClick = { viewModel.changeMode() },
 
-                                ) {
-                                val icon = if (viewModel.showDoneItems) {
-                                    painterResource(R.drawable.ic_visible)
-                                } else {
-                                    painterResource(R.drawable.ic_invisible)
+                                    ) {
+                                    val icon = if (viewModel.showDoneItems) {
+                                        painterResource(R.drawable.ic_visible)
+                                    } else {
+                                        painterResource(R.drawable.ic_invisible)
+                                    }
+
+                                    Icon(
+                                        painter = icon,
+                                        contentDescription = stringResource(R.string.item_info),
+                                        tint = LocalMyColors.current.colorBlue
+                                    )
                                 }
-
+                            }
+                        }
+                    }
+                },
+                content = {
+                    Column(
+                        modifier = Modifier
+                            .background(color = LocalMyColors.current.colorBackElevated),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .background(color = LocalMyColors.current.colorBackElevated)
+                        ) {
+                            TodoList(todoItems, viewModel)
+                            IconButton(
+                                onClick = { showThemeMenu.value = true },
+                                modifier = Modifier
+                                    .align(Alignment.BottomStart)
+                                    .padding(16.dp)
+                                    .size(56.dp)
+                            ) {
                                 Icon(
-                                    painter = icon,
-                                    contentDescription = stringResource(R.string.item_info),
+                                    painter = painterResource(R.drawable.ic_theme),
+                                    contentDescription = stringResource(R.string.change_theme),
                                     tint = LocalMyColors.current.colorBlue
                                 )
                             }
                         }
                     }
-                }
-            },
-            content = {
-                Column(
-                    modifier = Modifier
-                        .background(color = LocalMyColors.current.colorBackElevated),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .background(color = LocalMyColors.current.colorBackElevated)
+                },
+                floatingActionButton = {
+                    FloatingActionButton(
+                        onClick = {
+                            openAddEditFrag(AddEditTodoItemFragment.MODE_ADD)
+                        },
+                        backgroundColor = LocalMyColors.current.colorBlue
                     ) {
-                        TodoList(todoItems, viewModel)
-                        IconButton(
-                            onClick = { showThemeMenu.value = true },
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(16.dp)
-                                .size(56.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_theme),
-                                contentDescription = stringResource(R.string.change_theme),
-                                tint = LocalMyColors.current.colorBlue
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(R.string.add_new_to_do_item),
+                            tint = Color.White
+                        )
                     }
                 }
-            },
-            floatingActionButton = {
-                FloatingActionButton(
-                    onClick = {
-                        openAddEditFrag(AddEditTodoItemFragment.MODE_ADD)
-                    },
-                    backgroundColor = LocalMyColors.current.colorBlue
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(R.string.add_new_to_do_item),
-                        tint = Color.White
-                    )
-                }
-
-            }
-        )
-    }
-    }
-
-    @Preview("Light Theme", showBackground = true)
-    @Composable
-    fun MainTodoListScreenLightPreview() {
-        AppTheme {
-            MainTodoListScreen(viewModel = viewModel)
-        }
-    }
-
-    @Preview("Dark Theme", showBackground = true)
-    @Composable
-    fun MainTodoListScreenDarkPreview() {
-        AppTheme(darkTheme = true) {
-            MainTodoListScreen(viewModel = viewModel)
+            )
         }
     }
 
@@ -289,7 +270,39 @@ class MainTodoListFragment : Fragment() {
         }
     }
 
-    private fun openAddEditFrag(param:String) {
+    @Composable
+    fun TodoList(todoItems: MutableList<TodoItem>, viewModel: MainViewModel) {
+        AppTheme() {
+            val filteredItems = if (viewModel.showDoneItems) {
+                todoItems.sortedBy { it.creationDate }
+            } else {
+                todoItems.filter { !it.done }.sortedBy { it.creationDate }
+            }
+            LazyColumn {
+                items(filteredItems) { todoItem ->
+                    TodoItemRow(todoItem)
+                }
+            }
+        }
+    }
+
+    @Preview("Light Theme", showBackground = true)
+    @Composable
+    fun MainTodoListScreenLightPreview() {
+        AppTheme {
+            MainTodoListScreen(viewModel = viewModel)
+        }
+    }
+
+    @Preview("Dark Theme", showBackground = true)
+    @Composable
+    fun MainTodoListScreenDarkPreview() {
+        AppTheme(darkTheme = true) {
+            MainTodoListScreen(viewModel = viewModel)
+        }
+    }
+
+    private fun openAddEditFrag(param: String) {
         parentFragmentManager.beginTransaction()
             .setCustomAnimations(
                 R.anim.slide_in_right,
@@ -305,24 +318,6 @@ class MainTodoListFragment : Fragment() {
             .commit()
     }
 
-
-    @Composable
-    fun TodoList(todoItems: MutableList<TodoItem>, viewModel: MainViewModel) {
-        AppTheme() {
-            val filteredItems = if (viewModel.showDoneItems) {
-                todoItems.sortedBy { it.creationDate }
-            } else {
-                todoItems.filter { !it.done }.sortedBy { it.creationDate }
-            }
-
-
-            LazyColumn {
-                items(filteredItems) { todoItem ->
-                    TodoItemRow(todoItem)
-                }
-            }
-        }
-    }
 
     @OptIn(ExperimentalMaterialApi::class)
     @Composable

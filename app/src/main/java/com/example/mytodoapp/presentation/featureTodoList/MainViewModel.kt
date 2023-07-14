@@ -4,10 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.example.mytodoapp.data.SharedPreferencesHelper
 import com.example.mytodoapp.data.TodoListRepositoryImpl
@@ -16,20 +13,11 @@ import com.example.mytodoapp.domain.TodoItem
 import com.example.mytodoapp.domain.usecases.EditTodoItemUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.coroutines.launch
 
 /**
  * This class represents the ViewModel for the main screen of the application. It provides data and logic
@@ -58,12 +46,14 @@ class MainViewModel @Inject constructor(
     val data: StateFlow<MutableList<TodoItem>> = _data
     private val _doneTodoCount = MutableStateFlow(0)
     val doneTodoCount: StateFlow<Int> = _doneTodoCount
+
     init {
         if (connection.isOnline()) {
             loadNetworkList()
         }
         loadData()
     }
+
     fun initLifecycleOwner(owner: LifecycleOwner) {
         lifecycleOwner = owner
     }
@@ -123,12 +113,6 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun countItemsWithTrueDone(): Flow<Int> {
-        val todoList: Flow<List<TodoItem>> = repository.getAllData()
-        return todoList.map { list ->
-            list.count { it.done }
-        }
-    }
 
     override fun onCleared() {
         super.onCleared()

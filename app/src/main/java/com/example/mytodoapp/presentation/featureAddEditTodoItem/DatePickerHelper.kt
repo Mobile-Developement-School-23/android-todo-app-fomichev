@@ -1,8 +1,6 @@
 package com.example.mytodoapp.presentation.featureAddEditTodoItem
 
 import android.app.DatePickerDialog
-import android.widget.DatePicker
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mytodoapp.R
 import java.sql.Date
