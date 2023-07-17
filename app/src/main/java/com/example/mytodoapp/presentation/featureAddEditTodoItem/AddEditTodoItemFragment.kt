@@ -349,6 +349,7 @@ class AddEditTodoItemFragment : Fragment() {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth()
+                                .clickable {if (isEditMode) deleteTodoItem() }
                         ) {
                             IconButton(
                                 onClick = {
@@ -358,16 +359,16 @@ class AddEditTodoItemFragment : Fragment() {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
                                     contentDescription = stringResource(id = R.string.delete),
-                                    tint = MaterialTheme.colors.error
+                                    tint = if (isEditMode) LocalMyColors.current.colorRed else LocalMyColors.current.colorGrayLight
                                 )
                             }
 
                             Text(
                                 text = stringResource(id = R.string.delete),
                                 style = LocalMyTypography.current.subtitle1,
-                                color = LocalMyColors.current.colorRed,
+                                color = if (isEditMode) LocalMyColors.current.colorRed else LocalMyColors.current.colorGrayLight,
                                 modifier = Modifier.padding(start = 8.dp)
-                            )
+                            )}
                             if (showUndoSnackbar) {
                                 Snackbar(
                                     modifier = Modifier.padding(16.dp),
@@ -403,7 +404,7 @@ class AddEditTodoItemFragment : Fragment() {
                             }
                         }
                     }
-                }
+
             }
         )
     }

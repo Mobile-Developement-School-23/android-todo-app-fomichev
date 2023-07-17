@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,12 +34,15 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +57,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.mytodoapp.R
@@ -193,18 +198,18 @@ class MainTodoListFragment : Fragment() {
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                                .background(color = LocalMyColors.current.colorBackElevated)
+                            modifier = Modifier.weight(1f)
                         ) {
                             TodoList(todoItems, viewModel)
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 15.dp)
+                                .background(color = LocalMyColors.current.colorBackElevated)
+                        ) {
                             IconButton(
-                                onClick = { showThemeMenu.value = true },
-                                modifier = Modifier
-                                    .align(Alignment.BottomStart)
-                                    .padding(16.dp)
-                                    .size(56.dp)
+                                onClick = { showThemeMenu.value = true }
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.ic_theme),
@@ -238,34 +243,60 @@ class MainTodoListFragment : Fragment() {
         onCloseMenu: () -> Unit,
         onThemeSelected: (Int) -> Unit
     ) {
+        val isSystemInDarkTheme = isSystemInDarkTheme()
+        val backgroundColor = if (isSystemInDarkTheme) Color.Black else Color.White
+        val textColor = if (isSystemInDarkTheme) Color.White else Color.Black
+
         DropdownMenu(
             expanded = true,
             onDismissRequest = { onCloseMenu() },
-            modifier = Modifier.padding(end = 16.dp)
+            modifier = Modifier
+                .background(backgroundColor)
         ) {
             DropdownMenuItem(
                 onClick = {
                     onThemeSelected(AppCompatDelegate.MODE_NIGHT_NO)
                     onCloseMenu()
-                }
+                },
+                modifier = Modifier
+                    .padding(vertical = 0.dp)
             ) {
-                Text(stringResource(R.string.light_theme))
+                Text(
+                    text = stringResource(R.string.light_theme),
+                    color = textColor,
+                    modifier = Modifier
+                        .padding(vertical = 16.dp)
+                )
             }
             DropdownMenuItem(
                 onClick = {
                     onThemeSelected(AppCompatDelegate.MODE_NIGHT_YES)
                     onCloseMenu()
-                }
+                },
+                modifier = Modifier
+                    .padding(vertical = 0.dp)
             ) {
-                Text(stringResource(R.string.dark_theme))
+                Text(
+                    text = stringResource(R.string.dark_theme),
+                    color = textColor,
+                    modifier = Modifier
+                        .padding(vertical = 16.dp)
+                )
             }
             DropdownMenuItem(
                 onClick = {
                     onThemeSelected(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
                     onCloseMenu()
-                }
+                },
+                modifier = Modifier
+                    .padding(vertical = 0.dp)
             ) {
-                Text(stringResource(R.string.system_theme))
+                Text(
+                    text = stringResource(R.string.system_theme),
+                    color = textColor,
+                    modifier = Modifier
+                        .padding(vertical = 16.dp)
+                )
             }
         }
     }
@@ -286,21 +317,7 @@ class MainTodoListFragment : Fragment() {
         }
     }
 
-    @Preview("Light Theme", showBackground = true)
-    @Composable
-    fun MainTodoListScreenLightPreview() {
-        AppTheme {
-            MainTodoListScreen(viewModel = viewModel)
-        }
-    }
 
-    @Preview("Dark Theme", showBackground = true)
-    @Composable
-    fun MainTodoListScreenDarkPreview() {
-        AppTheme(darkTheme = true) {
-            MainTodoListScreen(viewModel = viewModel)
-        }
-    }
 
     private fun openAddEditFrag(param: String) {
         parentFragmentManager.beginTransaction()
