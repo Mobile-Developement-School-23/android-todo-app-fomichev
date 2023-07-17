@@ -85,6 +85,7 @@ class AddEditTodoItemFragment : Fragment() {
     private val datePickerHelper by lazy {
         DatePickerHelper(requireActivity() as AppCompatActivity)
     }
+    val addEditViewHelper = AddEditViewHelper()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -293,7 +294,7 @@ class AddEditTodoItemFragment : Fragment() {
                                 expanded = expanded,
                                 onDismissRequest = { expanded = false }
                             ) {
-                                PriorityItems(
+                                addEditViewHelper.PriorityItems(
                                     priority = priority,
                                     onPrioritySelected = {
                                         setPriority(it)
@@ -409,24 +410,6 @@ class AddEditTodoItemFragment : Fragment() {
         )
     }
 
-
-    @Preview("Light Theme", showBackground = true)
-    @Composable
-    fun AddEditTodoItemScreenLightPreview() {
-        AppTheme {
-            AddEditTodoItemScreen()
-
-        }
-    }
-
-    @Preview("Dark Theme", showBackground = true)
-    @Composable
-    fun AddEditTodoItemScreenDarkPreview() {
-        AppTheme(darkTheme = true) {
-            AddEditTodoItemScreen()
-        }
-    }
-
     private fun openMainFrag() {
         parentFragmentManager.beginTransaction()
             .setCustomAnimations(
@@ -483,30 +466,6 @@ class AddEditTodoItemFragment : Fragment() {
                 if (param1 != null) {
                     putString(ARG_PARAM1, param1)
                 }
-            }
-        }
-    }
-
-
-    @Composable
-    fun PriorityItems(
-        priority: Importance,
-        onPrioritySelected: (Importance) -> Unit
-    ) {
-        val priorityItems = listOf(
-            Pair(Importance.LOW, stringResource(id = R.string.low_priority)),
-            Pair(Importance.NORMAL, stringResource(id = R.string.normal_priority)),
-            Pair(Importance.HIGH, stringResource(id = R.string.high_priority))
-        )
-
-        priorityItems.forEach { (itemPriority, itemText) ->
-            DropdownMenuItem(
-                onClick = { onPrioritySelected(itemPriority) }
-            ) {
-                Text(
-                    text = itemText,
-                    style = LocalMyTypography.current.body2
-                )
             }
         }
     }

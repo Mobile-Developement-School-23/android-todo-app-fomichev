@@ -88,7 +88,7 @@ class MainTodoListFragment : Fragment() {
     private val datePickerHelper by lazy {
         DatePickerHelper(requireActivity() as AppCompatActivity)
     }
-
+    val mainTodoListViewHelper = MainTodoListViewHelper()
     override fun onAttach(context: Context) {
         super.onAttach(context)
         context.appComponent
@@ -129,7 +129,7 @@ class MainTodoListFragment : Fragment() {
             val selectedThemeMode = remember { mutableStateOf(AppCompatDelegate.MODE_NIGHT_NO) }
 
             if (showThemeMenu.value) {
-                ThemeMenuPopup(
+                mainTodoListViewHelper.ThemeMenuPopup(
                     onCloseMenu = { showThemeMenu.value = false },
                     onThemeSelected = { themeMode ->
                         selectedThemeMode.value = themeMode
@@ -235,69 +235,6 @@ class MainTodoListFragment : Fragment() {
                     }
                 }
             )
-        }
-    }
-
-    @Composable
-    fun ThemeMenuPopup(
-        onCloseMenu: () -> Unit,
-        onThemeSelected: (Int) -> Unit
-    ) {
-        val isSystemInDarkTheme = isSystemInDarkTheme()
-        val backgroundColor = if (isSystemInDarkTheme) Color.Black else Color.White
-        val textColor = if (isSystemInDarkTheme) Color.White else Color.Black
-
-        DropdownMenu(
-            expanded = true,
-            onDismissRequest = { onCloseMenu() },
-            modifier = Modifier
-                .background(backgroundColor)
-        ) {
-            DropdownMenuItem(
-                onClick = {
-                    onThemeSelected(AppCompatDelegate.MODE_NIGHT_NO)
-                    onCloseMenu()
-                },
-                modifier = Modifier
-                    .padding(vertical = 0.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.light_theme),
-                    color = textColor,
-                    modifier = Modifier
-                        .padding(vertical = 16.dp)
-                )
-            }
-            DropdownMenuItem(
-                onClick = {
-                    onThemeSelected(AppCompatDelegate.MODE_NIGHT_YES)
-                    onCloseMenu()
-                },
-                modifier = Modifier
-                    .padding(vertical = 0.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.dark_theme),
-                    color = textColor,
-                    modifier = Modifier
-                        .padding(vertical = 16.dp)
-                )
-            }
-            DropdownMenuItem(
-                onClick = {
-                    onThemeSelected(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                    onCloseMenu()
-                },
-                modifier = Modifier
-                    .padding(vertical = 0.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.system_theme),
-                    color = textColor,
-                    modifier = Modifier
-                        .padding(vertical = 16.dp)
-                )
-            }
         }
     }
 
